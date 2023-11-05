@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { blogPostsData } from '../utils/blogPost.data';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'
 
 export const PostList = () => {
+  const router = useRouter()
   const [posts, setPosts] = useState<any[]>([])
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export const PostList = () => {
           </Link>
           <button
             className='col-span-1 rounded-lg bg-red-500 hover:bg-red-400 text-white p-5 text-xl'
-            onClick={() => removePost(post.id)}>Edit</button>
+            onClick={() => router.push(`/posts/edit/${post.id}`)}>Edit</button>
           <button
             className='col-span-1 rounded-lg bg-red-500 hover:bg-red-400 text-white p-5 text-xl'
             onClick={() => removePost(post.id)}>X</button>

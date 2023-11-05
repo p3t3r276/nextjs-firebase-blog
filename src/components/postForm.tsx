@@ -1,6 +1,6 @@
 import { blogPostsData } from "@/utils/blogPost.data";
 import { Post } from "@/utils/post.model";
-import { FC, FormEvent, useState } from "react";
+import { FC, FormEvent, useEffect, useState } from "react";
 
 interface pageProps {
   post?: Post,
@@ -10,9 +10,13 @@ interface pageProps {
 
 export const Form: FC<pageProps> = ({ post, handleChange, handleSubmit }) => {
   const [currentPost, setcurrentPost] = useState<Post>({ id: '0', title: '',  content: '' })
-  if (post) {
-    setcurrentPost(currentPost)
-  }
+
+  useEffect(() => {
+    if (post) {
+      setcurrentPost(currentPost)
+    }
+  }, [])
+  
   return (
     <>
       <h2 className='text-center text-4xl'>{post?.id === 'new' ? 'New Post' : 'Edit Post'}</h2>
