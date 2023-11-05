@@ -7,7 +7,7 @@ export default function Home() {
       <div className="z-10 max-w-5xl w-full font-mono text-sm lg:flex">
         <h1 className="text-center text-4xl">Notes</h1>
         <p className="text-center text-xl">Taking note the new way.</p>
-        <Link href={'/posts/new'} className='text-white border-2 border-slate-900 bg-slate-950 hover:bg-slate-900 p-3 text-xl' >
+        <Link href={'/posts/edit/new'} className='text-white border-2 border-slate-900 bg-slate-950 hover:bg-slate-900 p-3 text-xl' >
           New Post
         </Link>
         <PostList />
