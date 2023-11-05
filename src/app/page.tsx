@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PostList } from "./components/PostList";
+import { PostList } from "../components/PostList";
 
 export default function Home() {
   return (

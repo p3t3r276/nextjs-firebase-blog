@@ -1,4 +1,3 @@
-
 import { FC } from "react";
 import { blogPostsData } from '../../../utils/blogPost.data'
 

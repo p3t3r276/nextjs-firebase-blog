@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { blogPostsData } from '../../utils/blogPost.data';
+import { blogPostsData } from '../utils/blogPost.data';
 import Link from 'next/link';
 
 export const PostList = () => {
