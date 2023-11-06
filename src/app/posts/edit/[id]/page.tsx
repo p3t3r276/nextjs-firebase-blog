@@ -35,9 +35,16 @@ const EditPost: FC<pageProps> = ({ params }) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // const post = blogPostsData.filter(post => post.id != params.id)
-    // blogPostsData.push({ ...post as any, id: lastPost.id + 1});
-    // router.push('/')
+    if (mode == 'new') {
+      const lastPost = blogPostsData[blogPostsData.length - 1]
+      blogPostsData.push({ ...post as any, id: lastPost.id + 1});
+      router.push('/')
+    } else {
+      const postToEditIndex = blogPostsData.findIndex(post => post.id == params.id)
+      blogPostsData[postToEditIndex] = post
+      router.push('/')      
+    }
+
     console.log(post)
   }
   return (
