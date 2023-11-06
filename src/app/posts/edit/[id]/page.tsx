@@ -4,6 +4,9 @@ import { blogPostsData } from '../../../../utils/blogPost.data'
 import { Form } from "@/components/postForm";
 import { useRouter } from "next/navigation";
 import { Post } from "@/utils/post.model";
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { postCollection } from "@/utils/constants";
 
 interface pageProps {
   params: { id: string }
@@ -11,41 +14,59 @@ interface pageProps {
 
 const EditPost: FC<pageProps> = ({ params }) => {
   const router = useRouter();
-  const [post, setPost] = useState<Post>({
-    id: "",
-    title: "",
-    content: "",
-  });
+  const [loading, setLoading] = useState(false);
+  const [post, setPost] = useState<Post>();
   const [mode, setMode] = useState('new')
 
   useEffect(() => {
+    async function getPostById(id: string) {
+      const snapshot = await getDoc(doc(db, postCollection, params.id))
+      if (snapshot.exists()) { 
+          setPost({ ...snapshot.data() as any, id: snapshot.id  })
+       }
+    }
+    
     if (params.id === 'new') {
       setMode('new')
+      setPost({ id: "", title: '', content: '' })
     } else {
-      setMode('edit')
-      const index = blogPostsData.findIndex(post => post.id == params.id)
-      setPost(blogPostsData[index])
+      setMode('edit');
+      try {
+        setLoading(true)
+        getPostById(params.id)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoading(false);
+      }
     }
   }, [])
   
   function handleChange(e: ChangeEvent<HTMLInputElement> | 
     ChangeEvent<HTMLTextAreaElement>) {
-      setPost({ ...post, [e.target.name]: e.target.value });
+      setPost({ ...post, [e.target.name]: e.target.value } as any);
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (mode == 'new') {
-      const lastPost = blogPostsData[blogPostsData.length - 1]
-      blogPostsData.push({ ...post as any, id: lastPost.id + 1});
-      router.push('/')
-    } else {
-      const postToEditIndex = blogPostsData.findIndex(post => post.id == params.id)
-      blogPostsData[postToEditIndex] = post
-      router.push('/')      
+    if (post) {
+      if (mode == 'new') {
+        await addDoc(collection(db, postCollection), {
+          title: post.title,
+          content: post.content
+        })
+        router.push('/')
+      } else {
+        const updatePost = async (post: Post) => {
+          await updateDoc(doc(db, postCollection, post.id), {
+            title: post.title,
+            content: post.content
+          })
+        }
+        updatePost(post)
+        router.push('/')      
+      }
     }
-
-    console.log(post)
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

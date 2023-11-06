@@ -1,20 +1,31 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { blogPostsData } from '../utils/blogPost.data';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
+import { Post } from '@/utils/post.model';
+import { collection, deleteDoc, doc, onSnapshot, query } from 'firebase/firestore';
+import { db } from '@/db/firebase';
+import { postCollection } from '@/utils/constants';
 
 export const PostList = () => {
   const router = useRouter()
-  const [posts, setPosts] = useState<any[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
 
   useEffect(() => {
-    setPosts(blogPostsData)
+    const q = query(collection(db, postCollection))
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let postArr: Post[] = [];
+
+      querySnapshot.forEach((doc) => {
+        postArr.push({ ...doc.data() as any, id: doc.id})
+      })
+      setPosts(postArr)
+      return () => unsubscribe();
+    })
   }, [])
 
-  const removePost = (id: string) => {
-    let newList = posts.filter(post => post.id != id)
-    setPosts(newList)
+  const removePost = async (id: string) => {
+    await deleteDoc(doc(db, postCollection, id))
   }
 
   return (

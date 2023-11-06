@@ -2,7 +2,7 @@ import { Post } from "@/utils/post.model";
 import { FC, FormEvent } from "react";
 
 interface pageProps {
-  post: Post,
+  post?: Post,
   handleSubmit: (e: FormEvent<HTMLFormElement>) => void,
   handleChange: (e: any) => void
 }
