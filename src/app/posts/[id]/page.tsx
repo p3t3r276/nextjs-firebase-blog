@@ -46,7 +46,7 @@ const Post: FC<pageProps> = ({ params }) => {
           {post.content}
         </div>
         <div>
-          Created By: at {dateTransform(post.createdAt)} <br /> Created By: at {dateTransform(post.updatedAt)}
+          Created By: at {dateTransform(post.createdAt)} <br /> Updated By: at {dateTransform(post.updatedAt)}
         </div>
       </div>
     </main>

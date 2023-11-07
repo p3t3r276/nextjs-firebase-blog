@@ -3,7 +3,8 @@ import { ChangeEvent, FC, FormEvent, useEffect, useState } from "react";
 import { Form } from "@/components/postForm";
 import { useRouter } from "next/navigation";
 import { Post } from "@/utils/post.model";
-import { Timestamp, addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+
 import { db } from "@/db/firebase";
 import { postCollection } from "@/utils/constants";
 
