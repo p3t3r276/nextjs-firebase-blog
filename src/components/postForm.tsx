@@ -1,6 +1,5 @@
-import { blogPostsData } from "@/utils/blogPost.data";
 import { Post } from "@/utils/post.model";
-import { FC, FormEvent, useState } from "react";
+import { FC, FormEvent } from "react";
 
 interface pageProps {
   post?: Post,
@@ -8,15 +7,15 @@ interface pageProps {
   handleChange: (e: any) => void
 }
 
-export const Form: FC<pageProps> = ({ post, handleChange, handleSubmit }) => {
-  const [currentPost, setcurrentPost] = useState<Post>({ id: '0', title: '',  content: '' })
-  if (post) {
-    setcurrentPost(currentPost)
-  }
+export const Form: FC<pageProps> = ({ 
+  post, 
+  handleChange, 
+  handleSubmit }) => {
+  
   return (
     <>
-      <h2 className='text-center text-4xl'>{post?.id === 'new' ? 'New Post' : 'Edit Post'}</h2>
-      <div>
+    {post ?
+      (<div>
         <form className="items-center mt-4" onSubmit={handleSubmit}>
           <div>
             <input 
@@ -24,7 +23,7 @@ export const Form: FC<pageProps> = ({ post, handleChange, handleSubmit }) => {
               name= 'title'
               className="block p-3 rounded-lg border w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500" 
               onChange={handleChange}
-              value={currentPost.title}
+              value={post.title}
               placeholder="Title" />
           </div>
           <div>
@@ -32,7 +31,7 @@ export const Form: FC<pageProps> = ({ post, handleChange, handleSubmit }) => {
               name= 'content'
               className="block p-2.5 mt-4 w-full rounded-lg border border-gray-300 focus:ring-blue-500"
               onChange={handleChange}
-              value={currentPost.content} 
+              value={post.content} 
               placeholder="Content"></textarea>
           </div>
           <div>
@@ -41,7 +40,8 @@ export const Form: FC<pageProps> = ({ post, handleChange, handleSubmit }) => {
               type="submit">Post</button>
           </div>
         </form>
-      </div>
+      </div>)
+    : ''}
     </>
   )
 }
