@@ -1,9 +1,11 @@
 'use client'
 import { FC, useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+
 import { Post } from '../../../utils/post.model'
 import { db } from "@/db/firebase";
-import { doc, getDoc } from "firebase/firestore";
 import { postCollection } from "@/utils/constants";
+import { dateTransform } from "@/utils/dateTransform";
 
 interface pageProps {
   params: { id: string }
@@ -42,6 +44,9 @@ const Post: FC<pageProps> = ({ params }) => {
         <h2 className="text-4xl text-center mb-4">{post.title}</h2>
         <div>
           {post.content}
+        </div>
+        <div>
+          Created By: at {dateTransform(post.createdAt)} <br /> Created By: at {dateTransform(post.updatedAt)}
         </div>
       </div>
     </main>

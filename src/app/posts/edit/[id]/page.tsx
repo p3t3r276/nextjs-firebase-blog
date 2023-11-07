@@ -1,10 +1,9 @@
 'use client'
 import { ChangeEvent, FC, FormEvent, useEffect, useState } from "react";
-import { blogPostsData } from '../../../../utils/blogPost.data'
 import { Form } from "@/components/postForm";
 import { useRouter } from "next/navigation";
 import { Post } from "@/utils/post.model";
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { postCollection } from "@/utils/constants";
 
@@ -26,9 +25,10 @@ const EditPost: FC<pageProps> = ({ params }) => {
        }
     }
     
-    if (params.id === 'new') {
+    if (params.id === 'new') {  
       setMode('new')
-      setPost({ id: "", title: '', content: '' })
+      const newDate  = Timestamp.fromDate(new Date())
+      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate })
     } else {
       setMode('edit');
       try {
@@ -51,22 +51,24 @@ const EditPost: FC<pageProps> = ({ params }) => {
     e.preventDefault();
     if (post) {
       if (mode == 'new') {
-        await addDoc(collection(db, postCollection), {
-          title: post.title,
-          content: post.content
-        })
+        await addDoc(collection(db, postCollection), post)
         router.push('/')
       } else {
         const updatePost = async (post: Post) => {
           await updateDoc(doc(db, postCollection, post.id), {
             title: post.title,
-            content: post.content
+            content: post.content,
+            updatedAt: Timestamp.fromDate(new Date())
           })
         }
         updatePost(post)
         router.push('/')      
       }
     }
+  }
+
+  if (loading) {
+    return <p>Loading...</p>
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

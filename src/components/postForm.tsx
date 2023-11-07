@@ -1,5 +1,6 @@
-import { Post } from "@/utils/post.model";
 import { FC, FormEvent } from "react";
+import { dateTransform } from "@/utils/dateTransform";
+import { Post } from "@/utils/post.model";
 
 interface pageProps {
   post?: Post,
@@ -40,6 +41,9 @@ export const Form: FC<pageProps> = ({
               type="submit">Post</button>
           </div>
         </form>
+        <div>
+          Created By: at {dateTransform(post.createdAt)} <br /> Updated By: at {dateTransform(post.updatedAt)}
+        </div>
       </div>)
     : ''}
     </>
