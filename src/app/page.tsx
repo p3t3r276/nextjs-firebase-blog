@@ -1,7 +1,35 @@
+'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { PostList } from "../components/PostList";
+import { UserAuth } from '@/context/AuthContext';
+import { useEffect } from 'react';
 
 export default function Home() {
+  const { user, googleSignIn, logOut } = UserAuth()
+  const handleSignIn = async () => {
+    try {
+      await googleSignIn()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await logOut()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    checkAuthentication()
+  }, [user])
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full font-mono text-sm lg:flex">
@@ -11,6 +39,22 @@ export default function Home() {
           New Post
         </Link>
         <PostList />
+        <div>
+          {!user 
+          ? <button onClick={handleSignIn}>Login</button>
+          : (
+            <div>
+              <p>Welcome, {user.displayName}</p>
+              <Image
+                src={user.photoURL}
+                width={500}
+                height={500}
+                alt="Picture of the author"
+              />
+              <button onClick={handleSignOut}>Logout</button>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
