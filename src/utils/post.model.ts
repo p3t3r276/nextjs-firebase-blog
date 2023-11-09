@@ -1,12 +1,12 @@
 import { Timestamp } from "firebase/firestore";
-import { User } from '@firebase/auth-types';
+import { BlogUser } from "./user.model";
 
 export interface Post {
   id: string,
   title: string,
   content: string,
   createdAt: Timestamp,
+  createdBy?: BlogUser,
   updatedAt: Timestamp,
-  createdBy: User,
-  updatedBy: User
+  updatedBy?: BlogUser
 }

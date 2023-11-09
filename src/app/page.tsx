@@ -44,7 +44,7 @@ export default function Home() {
           ? <button onClick={handleSignIn}>Login</button>
           : (
             <div>
-              <p>Welcome, {user.displayName}</p>
+              <p>Welcome, {user.name}</p>
               <Image
                 src={user.photoURL}
                 width={500}

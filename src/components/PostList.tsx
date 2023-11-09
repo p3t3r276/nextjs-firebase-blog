@@ -2,10 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
-import { Post } from '@/utils/post.model';
 import { collection, deleteDoc, doc, onSnapshot, query } from 'firebase/firestore';
+
+import { Post } from '@/utils/post.model';
 import { db } from '@/db/firebase';
 import { postCollection } from '@/utils/constants';
+import { durationFromNow } from '@/utils/dateTransform';
 
 export const PostList = () => {
   const router = useRouter()
@@ -34,6 +36,8 @@ export const PostList = () => {
         <div key={id} className='grid grid-cols-6 items-center'>
           <Link href={`/posts/${post.id}`} className='col-span-4 rounded-lg bg-slate-400 p-5 text-white my-2'>
             <h2>{post.title}</h2>
+            <div>Author: {post.createdBy?.name}</div>
+            <div>Edited by: {post.updatedBy?.name} {durationFromNow(post.updatedAt)}</div>
           </Link>
           <button
             className='col-span-1 rounded-lg bg-red-500 hover:bg-red-400 text-white p-5 text-xl'

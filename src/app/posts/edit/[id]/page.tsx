@@ -23,9 +23,9 @@ const EditPost: FC<pageProps> = ({ params }) => {
   useEffect(() => {
     async function getPostById(id: string) {
       const snapshot = await getDoc(doc(db, postCollection, params.id))
-      if (snapshot.exists()) { 
-          setPost({ ...snapshot.data() as any, id: snapshot.id  })
-       }
+      if (snapshot.exists()) {
+        setPost({ ...snapshot.data() as any, id: snapshot.id  })
+      }
     }
     
     if (params.id === 'new') {  
@@ -54,7 +54,8 @@ const EditPost: FC<pageProps> = ({ params }) => {
     e.preventDefault();
     if (post) {
       if (mode == 'new') {
-        await addDoc(collection(db, postCollection), post)
+        const { id, ...rest } = post
+        await addDoc(collection(db, postCollection), rest)
         router.push('/')
       } else {
         const updatePost = async (post: Post) => {
