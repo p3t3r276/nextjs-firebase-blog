@@ -7,12 +7,14 @@ import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/
 
 import { db } from "@/db/firebase";
 import { postCollection } from "@/utils/constants";
+import { UserAuth } from "@/context/AuthContext";
 
 interface pageProps {
   params: { id: string }
 }
 
 const EditPost: FC<pageProps> = ({ params }) => {
+  const { user } = UserAuth()
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [post, setPost] = useState<Post>();
@@ -29,7 +31,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
     if (params.id === 'new') {  
       setMode('new')
       const newDate  = Timestamp.fromDate(new Date())
-      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate })
+      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: user, updatedBy: user })
     } else {
       setMode('edit');
       try {
@@ -59,7 +61,8 @@ const EditPost: FC<pageProps> = ({ params }) => {
           await updateDoc(doc(db, postCollection, post.id), {
             title: post.title,
             content: post.content,
-            updatedAt: Timestamp.fromDate(new Date())
+            updatedAt: Timestamp.fromDate(new Date()),
+            updatedBy: user
           })
         }
         updatePost(post)

@@ -42,7 +42,8 @@ export const Form: FC<pageProps> = ({
           </div>
         </form>
         <div>
-          Created By: at {dateTransform(post.createdAt)} <br /> Updated By: at {dateTransform(post.updatedAt)}
+          Created By: {post.createdBy ? post.createdBy.displayName : ''} at {dateTransform(post.createdAt)} <br /> 
+          Updated By: {post.updatedBy ? post.updatedBy.displayName : ''} at {dateTransform(post.updatedAt)}
         </div>
       </div>)
     : ''}
