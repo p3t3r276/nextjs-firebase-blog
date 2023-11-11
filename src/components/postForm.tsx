@@ -1,17 +1,29 @@
-import { FC, FormEvent } from "react";
+import { ChangeEvent, FC, FormEvent } from "react";
+import dynamic from "next/dynamic";
+
 import { dateTransform } from "@/utils/dateTransform";
 import { Post } from "@/utils/post.model";
 
 interface pageProps {
   post?: Post,
   handleSubmit: (e: FormEvent<HTMLFormElement>) => void,
-  handleChange: (e: any) => void
+  handleChange: (name: string, value: any) => void
 }
+
+const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
 export const Form: FC<pageProps> = ({ 
   post, 
   handleChange, 
   handleSubmit }) => {
+
+  
+
+  const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    handleChange(e.target.name, e.target.value)
+  }
+
+  const handleEditor = (value: any) => handleChange('content', value)
   
   return (
     <>
@@ -23,17 +35,15 @@ export const Form: FC<pageProps> = ({
               type="text" 
               name= 'title'
               className="block p-3 rounded-lg border w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500" 
-              onChange={handleChange}
+              onChange={handleInput}
               value={post.title}
               placeholder="Title" />
           </div>
-          <div>
-            <textarea  
-              name= 'content'
-              className="block p-2.5 mt-4 w-full rounded-lg border border-gray-300 focus:ring-blue-500"
-              onChange={handleChange}
-              value={post.content} 
-              placeholder="Content"></textarea>
+          <div className="mt-4">
+            <Editor
+              value={post.content}
+              onChange={handleEditor}
+            />
           </div>
           <div>
             <button 

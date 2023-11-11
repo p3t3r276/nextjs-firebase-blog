@@ -1,5 +1,5 @@
 'use client'
-import { ChangeEvent, FC, FormEvent, useEffect, useState } from "react";
+import { FC, FormEvent, useEffect, useState } from "react";
 import { Form } from "@/components/postForm";
 import { useRouter } from "next/navigation";
 import { Post } from "@/utils/post.model";
@@ -45,9 +45,8 @@ const EditPost: FC<pageProps> = ({ params }) => {
     }
   }, [])
   
-  function handleChange(e: ChangeEvent<HTMLInputElement> | 
-    ChangeEvent<HTMLTextAreaElement>) {
-      setPost({ ...post, [e.target.name]: e.target.value } as any);
+  function handleChange(name: string, value: any) {
+      setPost({ ...post, [name]: value } as any);
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
