@@ -8,6 +8,7 @@ import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/
 import { db } from "@/db/firebase";
 import { postCollection } from "@/utils/constants";
 import { UserAuth } from "@/context/AuthContext";
+import { BlogUser } from "@/utils/user.model";
 
 interface pageProps {
   params: { id: string }
@@ -31,7 +32,12 @@ const EditPost: FC<pageProps> = ({ params }) => {
     if (params.id === 'new') {  
       setMode('new')
       const newDate  = Timestamp.fromDate(new Date())
-      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: user, updatedBy: user })
+      const currentBlogUser: BlogUser = {
+        id: user.uid,
+        name: user.displayName,
+        email: user.email
+      }
+      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: currentBlogUser, updatedBy: currentBlogUser })
     } else {
       setMode('edit');
       try {
@@ -62,7 +68,11 @@ const EditPost: FC<pageProps> = ({ params }) => {
             title: post.title,
             content: post.content,
             updatedAt: Timestamp.fromDate(new Date()),
-            updatedBy: user
+            updatedBy: {
+              id: user.uid,
+              name: user.displayName,
+              email: user.email
+            }
           })
         }
         updatePost(post)
@@ -76,7 +86,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full font-mono text-sm lg:flex">
+      <div className="z-10 max-w-5xl w-full font-mono text-sm">
       <h2 className='text-center text-4xl'>{mode === 'new' ? 'New Post' : 'Edit Post'}</h2>
         <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} />
       </div>

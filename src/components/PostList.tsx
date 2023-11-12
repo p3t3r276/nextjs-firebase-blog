@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
 import { collection, deleteDoc, doc, onSnapshot, query } from 'firebase/firestore';
+import { AiTwotoneEdit } from 'react-icons/ai'
+import { FaTrashAlt } from 'react-icons/fa'
 
 import { Post } from '@/utils/post.model';
 import { db } from '@/db/firebase';
@@ -40,11 +42,18 @@ export const PostList = () => {
             <div>Edited by: {post.updatedBy?.name} {durationFromNow(post.updatedAt)}</div>
           </Link>
           <button
-            className='col-span-1 rounded-lg bg-red-500 hover:bg-red-400 text-white p-5 text-xl'
-            onClick={() => router.push(`/posts/edit/${post.id}`)}>Edit</button>
+            className='flex items-center justify-center rounded-lg bg-blue-500 hover:bg-blue-400 text-white text-xl h-24'
+            onClick={() => router.push(`/posts/edit/${post.id}`)}>
+              <AiTwotoneEdit />
+              <span className='sr-only'>Edit</span> 
+            </button>
           <button
-            className='col-span-1 rounded-lg bg-red-500 hover:bg-red-400 text-white p-5 text-xl'
-            onClick={() => removePost(post.id)}>X</button>
+            className='flex items-center justify-center rounded-lg bg-red-500 hover:bg-red-400 text-white text-xl h-24'
+            onClick={() => removePost(post.id)}>
+              
+              <FaTrashAlt />
+              <span className='sr-only'>Delete</span>
+          </button>
         </div>
       ))}
     </div>
