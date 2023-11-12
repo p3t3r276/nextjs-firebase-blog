@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
-import { collection, deleteDoc, doc, onSnapshot, query } from 'firebase/firestore';
+import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { AiTwotoneEdit } from 'react-icons/ai'
 import { FaTrashAlt } from 'react-icons/fa'
 
@@ -16,7 +16,7 @@ export const PostList = () => {
   const [posts, setPosts] = useState<Post[]>([])
 
   useEffect(() => {
-    const q = query(collection(db, postCollection))
+    const q = query(collection(db, postCollection), orderBy('updatedAt', 'desc'))
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       let postArr: Post[] = [];
 
