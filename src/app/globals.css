@@ -25,3 +25,7 @@ body {
     )
     rgb(var(--background-start-rgb));
 } */
+
+.ck-editor__editable {
+  min-height: 300px;
+}
