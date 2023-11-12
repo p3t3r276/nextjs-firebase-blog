@@ -1,7 +1,8 @@
 'use client'
 import { FC, PropsWithChildren, createContext, useContext, useState, useEffect } from "react";
-import { signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider, User } from 'firebase/auth'
+import { signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '@/db/firebase'
+
 import { BlogUser } from "@/utils/user.model";
 
 export const AuthContext  = createContext<any>(null);
@@ -20,14 +21,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser({
-          id: currentUser?.uid,
-          email: currentUser?.email,
-          name: currentUser?.displayName,
-          photoURL: currentUser?.photoURL 
-        })
-      }
+      setUser(currentUser)
     })
     return () => unsubscribe();
   }, [user])
