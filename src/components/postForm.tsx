@@ -17,8 +17,6 @@ export const Form: FC<pageProps> = ({
   handleChange, 
   handleSubmit }) => {
 
-  
-
   const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     handleChange(e.target.name, e.target.value)
   }

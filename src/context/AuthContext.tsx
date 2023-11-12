@@ -20,12 +20,14 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser({
-        id: currentUser?.uid,
-        email: currentUser?.email,
-        name: currentUser?.displayName,
-        photoURL: currentUser?.photoURL 
-      })
+      if (currentUser) {
+        setUser({
+          id: currentUser?.uid,
+          email: currentUser?.email,
+          name: currentUser?.displayName,
+          photoURL: currentUser?.photoURL 
+        })
+      }
     })
     return () => unsubscribe();
   }, [user])
