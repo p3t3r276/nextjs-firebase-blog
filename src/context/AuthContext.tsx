@@ -5,12 +5,19 @@ import { auth } from '@/db/firebase'
 
 import { BlogUser } from "@/utils/user.model";
 
-export const AuthContext  = createContext<any>(null);
+export const AuthContext  = createContext<any>({
+  user: null,
+  authLoading: false,
+  googleSignIn: undefined,
+  logOut: undefined
+});
 
 export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [user, setUser] = useState<BlogUser | null>()
+  const [user, setUser] = useState<any>()
+  const [authLoading, setAuthLoading] = useState(true)
 
   const googleSignIn = () => {
+    setAuthLoading(true)
     const provider = new GoogleAuthProvider()
     signInWithPopup(auth, provider)
   }
@@ -20,13 +27,19 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser)
+        setAuthLoading(false)
+      } else {
+        setUser(null)
+        setAuthLoading(false)
+      }
     })
     return () => unsubscribe();
   }, [user])
 
-  return (<AuthContext.Provider value={{user, googleSignIn, logOut }}>{children}</AuthContext.Provider>)
+  return (<AuthContext.Provider value={{user, authLoading, googleSignIn, logOut }}>{children}</AuthContext.Provider>)
 }
 
 export const UserAuth = () => {
