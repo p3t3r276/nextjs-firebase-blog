@@ -2,14 +2,18 @@
 import { FC, PropsWithChildren, createContext, useContext, useState, useEffect } from "react";
 import { signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from 'firebase/auth'
 import { auth } from '@/db/firebase'
-
 import { BlogUser } from "@/utils/user.model";
 
-export const AuthContext  = createContext<any>({
+export const AuthContext  = createContext<{
+  user: BlogUser | null,
+  authLoading: boolean,
+  googleSignIn: () => void,
+  logOut: () => void
+}>({
   user: null,
   authLoading: false,
-  googleSignIn: undefined,
-  logOut: undefined
+  googleSignIn: () => {},
+  logOut: () => {}
 });
 
 export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
