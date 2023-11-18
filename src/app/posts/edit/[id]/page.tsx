@@ -2,7 +2,7 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { Form } from "@/components/postForm";
 import { useRouter } from "next/navigation";
-import { Post } from "@/utils/post.model";
+import { Post, Tag } from "@/utils/post.model";
 import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 
 import { db } from "@/db/firebase";
@@ -13,6 +13,13 @@ import { BlogUser } from "@/utils/user.model";
 interface pageProps {
   params: { id: string }
 }
+
+const tags: Tag[] = [
+  { id: 'asdasds', name: 'News' },
+  { id: 'id2', name: 'News 1' },
+  { id: 'id3', name: 'News 2' },
+  { id: 'id4', name: 'News 3' },
+]
 
 const EditPost: FC<pageProps> = ({ params }) => {
   const { user } = UserAuth()
@@ -37,7 +44,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
         name: user?.name,
         email: user?.email
       }
-      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: currentBlogUser, updatedBy: currentBlogUser, tag: [] })
+      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: currentBlogUser, updatedBy: currentBlogUser, tags: [] })
     } else {
       setMode('edit');
       try {
@@ -52,7 +59,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
   }, [])
   
   function handleChange(name: string, value: any) {
-      setPost({ ...post, [name]: value } as any);
+    setPost({ ...post, [name]: value } as any);
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -88,7 +95,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="max-w-8xl w-full font-mono text-sm">
         <h2 className='text-center text-4xl'>{mode === 'new' ? 'New Post' : 'Edit Post'}</h2>
-        <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} />
+        <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} tag={tags} />
       </div>
     </main>
   )

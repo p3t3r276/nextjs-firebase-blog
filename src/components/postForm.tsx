@@ -4,6 +4,7 @@ import CreatableSelect from 'react-select/creatable';
 
 import { dateTransform } from "@/utils/dateTransform";
 import { Post, Tag } from "@/utils/post.model";
+import { Item } from "@/utils/item.model";
 
 interface pageProps {
   post?: Post,
@@ -25,7 +26,11 @@ export const Form: FC<pageProps> = ({
   }
 
   const handleEditor = (value: any) => handleChange('content', value)
-  
+  const handleSlection = (value: any) => handleChange('tags', value)
+
+  // setup tag selection
+  const selectItems: Item[] = tag.map(t => Object.assign({ value: t.id, label: t.name }, {}))
+  const defaultValue = post && post.tags ? post.tags.map(tag => tag.id) : []
   return (
     <>
     {post ?
@@ -52,7 +57,12 @@ export const Form: FC<pageProps> = ({
               {/* display image */}
               {/* Tag input */}
               <div className="m-4">
-                <CreatableSelect options={tag} isMulti name="tags" defaultInputValue={post.tag} /> 
+              <CreatableSelect 
+                  options={selectItems as any} 
+                  isMulti={true}
+                  name="tags"
+                  onChange={(val) => handleSlection(val)} 
+                  defaultValue={[...defaultValue]} /> 
               </div>
               <div className="w-full text-center">
                 <button 

@@ -28,10 +28,10 @@ export const Navbar: FC = () => {
         {user ? 
         (<>
           <div className="ml-4">
-            <span>Welome, {user.name}</span>
+            <span>Welome, {user.displayName}</span>
           </div>
           <div className="ml-4">
-            <Image src={user.photoURL as string} height={8} width={8} alt="User Photo" className="h-8 w-8 rounded-full" />
+            <Image src={user.photoURL as string} height={8} width={8} alt="User Photo" unoptimized className="h-8 w-8 rounded-full" />
           </div>
           <div className="ml-4">
             <button onClick={handleSignOut} >Log out</button>
