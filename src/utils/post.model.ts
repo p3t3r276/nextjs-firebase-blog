@@ -8,5 +8,11 @@ export interface Post {
   createdAt: Timestamp,
   createdBy?: BlogUser,
   updatedAt: Timestamp,
-  updatedBy?: BlogUser
+  updatedBy?: BlogUser,
+  tag: Tag[]
+}
+
+export interface Tag {
+  id?: string,
+  name: string
 }

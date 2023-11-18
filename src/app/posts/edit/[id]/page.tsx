@@ -33,11 +33,11 @@ const EditPost: FC<pageProps> = ({ params }) => {
       setMode('new')
       const newDate  = Timestamp.fromDate(new Date())
       const currentBlogUser: BlogUser = {
-        id: user.uid,
-        name: user.displayName,
-        email: user.email
+        id: user?.id,
+        name: user?.name,
+        email: user?.email
       }
-      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: currentBlogUser, updatedBy: currentBlogUser })
+      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: currentBlogUser, updatedBy: currentBlogUser, tag: [] })
     } else {
       setMode('edit');
       try {
@@ -69,9 +69,9 @@ const EditPost: FC<pageProps> = ({ params }) => {
             content: post.content,
             updatedAt: Timestamp.fromDate(new Date()),
             updatedBy: {
-              id: user.uid,
-              name: user.displayName,
-              email: user.email
+              id: user?.id,
+              name: user?.name,
+              email: user?.email
             }
           })
         }
@@ -86,8 +86,8 @@ const EditPost: FC<pageProps> = ({ params }) => {
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full font-mono text-sm">
-      <h2 className='text-center text-4xl'>{mode === 'new' ? 'New Post' : 'Edit Post'}</h2>
+      <div className="max-w-8xl w-full font-mono text-sm">
+        <h2 className='text-center text-4xl'>{mode === 'new' ? 'New Post' : 'Edit Post'}</h2>
         <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} />
       </div>
     </main>

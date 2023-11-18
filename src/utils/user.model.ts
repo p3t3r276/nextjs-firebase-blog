@@ -1,5 +1,5 @@
 export interface BlogUser {
-  id: string,
+  id?: string,
   name?: string,
   email?: string,
   photoURL?: string
