@@ -21,7 +21,6 @@ const Post: FC<pageProps> = ({ params }) => {
         const postData: Post = snapshot.data() as any;
         postData.id = snapshot.id
         
-        
         // get tags data
         // Query the tags subcollection
         const tagsQuerySnapshot = query(collection(db, `${postCollection}/${snapshot.id}/${tagCollection}`))

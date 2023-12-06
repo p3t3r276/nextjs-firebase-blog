@@ -1,4 +1,5 @@
-import { ChangeEvent, FC, FormEvent } from "react";
+'use client'
+import { ChangeEvent, FC, FormEvent, useState } from "react";
 import dynamic from "next/dynamic";
 import CreatableSelect from 'react-select/creatable';
 
@@ -8,7 +9,7 @@ import { Item } from "@/utils/item.model";
 
 interface pageProps {
   post?: Post,
-  tag: Tag[],
+  tags: Tag[],
   handleSubmit: (e: FormEvent<HTMLFormElement>) => void,
   handleChange: (name: string, value: any) => void
 }
@@ -19,7 +20,7 @@ export const Form: FC<pageProps> = ({
   post, 
   handleChange, 
   handleSubmit,
-  tag }) => {
+  tags }) => {
 
   const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     handleChange(e.target.name, e.target.value)
@@ -28,9 +29,8 @@ export const Form: FC<pageProps> = ({
   const handleEditor = (value: any) => handleChange('content', value)
   const handleSlection = (value: any) => handleChange('tags', value)
 
-  // setup tag selection
-  const selectItems: Item[] = tag.map(t => Object.assign({ value: t.id, label: t.name }, {}))
-  const defaultValue = post && post.tags ? post.tags.map(tag => tag.id) : []
+  const selectItems: Item[] = tags.map(t => Object.assign({ value: t.id, label: t.name }, {}))
+  const defaultValue = post && post.tags.length > 0 ? post.tags.map(t => Object.assign({ value: t.id, label: t.name }, {})) : []
   return (
     <>
     {post ?
@@ -58,11 +58,11 @@ export const Form: FC<pageProps> = ({
               {/* Tag input */}
               <div className="m-4">
               <CreatableSelect 
-                  options={selectItems as any} 
+                  options={selectItems} 
                   isMulti={true}
                   name="tags"
                   onChange={(val) => handleSlection(val)} 
-                  defaultValue={[...defaultValue]} /> 
+                  defaultValue={defaultValue} /> 
               </div>
               <div className="w-full text-center">
                 <button 

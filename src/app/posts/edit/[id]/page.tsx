@@ -3,10 +3,10 @@ import { FC, FormEvent, useEffect, useState } from "react";
 import { Form } from "@/components/postForm";
 import { useRouter } from "next/navigation";
 import { Post, Tag } from "@/utils/post.model";
-import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDoc, onSnapshot, query, updateDoc } from "firebase/firestore";
 
 import { db } from "@/db/firebase";
-import { postCollection } from "@/utils/constants";
+import { postCollection, tagCollection } from "@/utils/constants";
 import { UserAuth } from "@/context/AuthContext";
 import { BlogUser } from "@/utils/user.model";
 
@@ -14,25 +14,33 @@ interface pageProps {
   params: { id: string }
 }
 
-const tags: Tag[] = [
-  { id: 'asdasds', name: 'News' },
-  { id: 'id2', name: 'News 1' },
-  { id: 'id3', name: 'News 2' },
-  { id: 'id4', name: 'News 3' },
-]
-
 const EditPost: FC<pageProps> = ({ params }) => {
   const { user } = UserAuth()
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [post, setPost] = useState<Post>();
   const [mode, setMode] = useState('new')
+  const [tags, setTags] = useState<Tag[]>([])
 
   useEffect(() => {
     async function getPostById(id: string) {
       const snapshot = await getDoc(doc(db, postCollection, params.id))
       if (snapshot.exists()) {
-        setPost({ ...snapshot.data() as any, id: snapshot.id  })
+        const postData: Post = snapshot.data() as any;
+        postData.id = snapshot.id
+        
+        // get tags data
+        // Query the tags subcollection
+        const tagsQuerySnapshot = query(collection(db, `${postCollection}/${snapshot.id}/${tagCollection}`))
+        
+        const unsubscribe = onSnapshot(tagsQuerySnapshot, (querySnapshot) => {
+          let tags: Tag[] = [];
+          querySnapshot.forEach(doc => {
+            tags.push({ ...doc.data() as any, id: doc.id})
+          })
+          setPost({ ...snapshot.data() as any, id: snapshot.id, tags  })
+          return () => unsubscribe()
+        })
       }
     }
     
@@ -56,6 +64,19 @@ const EditPost: FC<pageProps> = ({ params }) => {
         setLoading(false);
       }
     }
+  }, [])
+
+  useEffect(() => {
+    const q = query(collection(db, tagCollection))
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      let tagArr: Tag[] = [];
+
+      querySnapshot.forEach((doc) => {
+        tagArr.push({ ...doc.data() as any, id: doc.id})
+      })
+      setTags(tagArr)
+      return () => unsubscribe();
+    })
   }, [])
   
   function handleChange(name: string, value: any) {
@@ -95,7 +116,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="max-w-8xl w-full font-mono text-sm">
         <h2 className='text-center text-4xl'>{mode === 'new' ? 'New Post' : 'Edit Post'}</h2>
-        <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} tag={tags} />
+        <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} tags={tags} />
       </div>
     </main>
   )
