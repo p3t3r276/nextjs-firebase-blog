@@ -1,6 +1,7 @@
 'use client'
 import { FC } from "react"
 import Image from 'next/image'
+import Link from 'next/link'
 
 import { UserAuth } from "@/context/AuthContext"
 
@@ -23,8 +24,15 @@ export const Navbar: FC = () => {
   }
   return (
     <nav className="flex items-center justify-between bg-black text-white p-4">
-      <div className="text-white text-xl font-semibold">NoteApp</div>
+      <div className="text-white text-xl font-semibold"><Link href={'/'}>
+        NoteApp
+      </Link></div>
       <div className="flex items-center">
+        <div className="ml-4">
+          <Link href={'/about'}>
+            About
+          </Link>
+        </div>
         {user ? 
         (<>
           <div className="ml-4">
