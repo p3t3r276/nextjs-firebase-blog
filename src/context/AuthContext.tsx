@@ -1,6 +1,7 @@
 'use client'
 import { FC, PropsWithChildren, createContext, useContext, useState, useEffect } from "react";
 import { signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from 'firebase/auth'
+import { useRouter } from "next/navigation";
 import { auth } from '@/db/firebase'
 import { BlogUser } from "@/utils/user.model";
 
@@ -19,6 +20,7 @@ export const AuthContext  = createContext<{
 export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<any>()
   const [authLoading, setAuthLoading] = useState(true)
+  const router = useRouter();
 
   const googleSignIn = () => {
     setAuthLoading(true)
@@ -33,7 +35,11 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        setUser(currentUser)
+        let blogUser: BlogUser = { id: currentUser.uid,
+          name: currentUser.displayName,
+          email: currentUser.email,
+          photoURL: currentUser.photoURL }
+        setUser(blogUser)
         setAuthLoading(false)
       } else {
         setUser(null)
@@ -41,7 +47,16 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
       }
     })
     return () => unsubscribe();
-  }, [user])
+  }, [])
+
+  useEffect(() => {
+    onAuthStateChanged(auth, async authUser => {
+        if (user === undefined) return;
+        if (user?.email !== authUser?.email) {
+          router.refresh();
+        }
+    });
+}, [user]);
 
   return (<AuthContext.Provider value={{user, authLoading, googleSignIn, logOut }}>{children}</AuthContext.Provider>)
 }

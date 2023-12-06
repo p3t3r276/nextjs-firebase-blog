@@ -1,14 +1,14 @@
 'use client'
 import { FC, FormEvent, useEffect, useState } from "react";
-import { Form } from "@/components/postForm";
 import { useRouter } from "next/navigation";
-import { Post, Tag } from "@/utils/post.model";
 import { Timestamp, addDoc, collection, doc, getDoc, onSnapshot, query, updateDoc } from "firebase/firestore";
 
 import { db } from "@/db/firebase";
 import { postCollection, tagCollection } from "@/utils/constants";
 import { UserAuth } from "@/context/AuthContext";
+import { Post, Tag } from "@/utils/post.model";
 import { BlogUser } from "@/utils/user.model";
+import { Form } from "@/components/postForm";
 
 interface pageProps {
   params: { id: string }
@@ -112,6 +112,8 @@ const EditPost: FC<pageProps> = ({ params }) => {
   if (loading) {
     return <p>Loading...</p>
   }
+
+  console.log('rerender')
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="max-w-8xl w-full font-mono text-sm">

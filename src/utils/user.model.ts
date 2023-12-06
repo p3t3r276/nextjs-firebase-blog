@@ -1,6 +1,6 @@
 export interface BlogUser {
-  id?: string,
-  name?: string,
-  email?: string,
-  photoURL?: string
+  id: string | null,
+  name: string | null,
+  email: string | null,
+  photoURL: string | null
 }

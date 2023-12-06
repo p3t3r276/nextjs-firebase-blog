@@ -36,7 +36,7 @@ export const Navbar: FC = () => {
         {user ? 
         (<>
           <div className="ml-4">
-            <span>Welome, {user.displayName}</span>
+            <span>Welome, {user.name}</span>
           </div>
           <div className="ml-4">
             <Image src={user.photoURL as string} height={8} width={8} alt="User Photo" unoptimized className="h-8 w-8 rounded-full" />
