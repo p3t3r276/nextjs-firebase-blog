@@ -1,7 +1,7 @@
 'use client'
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Timestamp, addDoc, collection, doc, getDoc, onSnapshot, query, updateDoc, writeBatch } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, writeBatch } from "firebase/firestore";
 
 import { db } from "@/db/firebase";
 import { postCollection, tagCollection } from "@/utils/constants";
@@ -101,7 +101,30 @@ const EditPost: FC<pageProps> = ({ params }) => {
           await batch.commit();
           router.push('/')
         } else {
+          const getTagsByPostId = async (id: string) => {
+            let result: Tag[] = [];
+            console.log('haizzz')
+            const tagsSubColRef = collection(db, `${postCollection}/${id}/${tagCollection}`)
+            
+            const snapShot= await getDocs(tagsSubColRef)
+            snapShot.docs.forEach(doc => {
+              result.push({ ...doc.data() as any, id: doc.id})
+            })
+
+            return result;
+          }
+
           const updatePost = async (post: Post) => {
+            const tagsDataFromServer = await getTagsByPostId(post.id);
+            
+            /* update tags */
+            // add new tags
+            let addedTags = post.tags.filter(tag => !tagsDataFromServer.includes(tag))
+            // create new tags and add
+            let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
+            // delete tags
+            let deletedTags = tagsDataFromServer.filter(tag => !post.tags.includes(tag))
+
             await updateDoc(doc(db, postCollection, post.id), {
               title: post.title,
               content: post.content,
@@ -112,9 +135,24 @@ const EditPost: FC<pageProps> = ({ params }) => {
                 email: user?.email
               }
             })
+
+            const batch = writeBatch(db);
+            const postRef = doc(db, postCollection, post.id)
+            const tagRef = collection(postRef, tagCollection)
+
+            deletedTags.map(tag => {
+              batch.delete(doc(tagRef, tag.id));
+            })
+
+            addedTags.map(tag => {
+              batch.set(doc(tagRef), tag)
+            })
+
+            await batch.commit();
           }
-          updatePost(post)
-          router.push('/')      
+
+          await updatePost(post)
+          // router.push('/')      
         }
       }
     } catch (err) {
