@@ -90,12 +90,12 @@ const EditPost: FC<pageProps> = ({ params }) => {
         if (mode == 'new') {
           const { id, tags, ...rest } = post
           const snapShot = await addDoc(collection(db, postCollection), rest)
-
+          console.log(tags)
           const batch = writeBatch(db);
           const postRef = doc(db, postCollection, snapShot.id)
-          const tagRef = doc(collection(postRef, tagCollection))
 
           tags.map(tag => {
+            let tagRef = doc(collection(postRef, tagCollection))
             batch.set(tagRef, tag)
           })
           await batch.commit();
@@ -103,7 +103,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
         } else {
           const getTagsByPostId = async (id: string) => {
             let result: Tag[] = [];
-            console.log('haizzz')
+            
             const tagsSubColRef = collection(db, `${postCollection}/${id}/${tagCollection}`)
             
             const snapShot= await getDocs(tagsSubColRef)
@@ -125,6 +125,17 @@ const EditPost: FC<pageProps> = ({ params }) => {
             // delete tags
             let deletedTags = tagsDataFromServer.filter(tag => !post.tags.includes(tag))
 
+            if (newlyCreatedTags.length > 0) {
+              // create new tags
+              const newTagsWriteBatch = writeBatch(db);
+
+              newlyCreatedTags.map(tag => {
+                const tagRef = doc(collection(db, tagCollection));
+                newTagsWriteBatch.set(tagRef, { name: tag.name })
+              })
+              await newTagsWriteBatch.commit();
+            }
+
             await updateDoc(doc(db, postCollection, post.id), {
               title: post.title,
               content: post.content,
@@ -138,14 +149,14 @@ const EditPost: FC<pageProps> = ({ params }) => {
 
             const batch = writeBatch(db);
             const postRef = doc(db, postCollection, post.id)
-            const tagRef = collection(postRef, tagCollection)
+            const tagSubColRef = collection(postRef, tagCollection)
 
             deletedTags.map(tag => {
-              batch.delete(doc(tagRef, tag.id));
+              batch.delete(doc(tagSubColRef, tag.id));
             })
 
             addedTags.map(tag => {
-              batch.set(doc(tagRef), tag)
+              batch.set(doc(tagSubColRef), { name: tag.name })
             })
 
             await batch.commit();
