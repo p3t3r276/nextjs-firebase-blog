@@ -51,10 +51,10 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     onAuthStateChanged(auth, async authUser => {
-        if (user === undefined) return;
-        if (user?.email !== authUser?.email) {
-          router.refresh();
-        }
+      if (user === undefined) return;
+      if (user?.email !== authUser?.email) {
+        router.refresh();
+      }
     });
 }, [user]);
 

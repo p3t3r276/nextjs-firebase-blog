@@ -1,7 +1,7 @@
 'use client'
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Timestamp, addDoc, collection, doc, getDoc, onSnapshot, query, updateDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDoc, onSnapshot, query, updateDoc, writeBatch } from "firebase/firestore";
 
 import { db } from "@/db/firebase";
 import { postCollection, tagCollection } from "@/utils/constants";
@@ -85,27 +85,40 @@ const EditPost: FC<pageProps> = ({ params }) => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (post) {
-      if (mode == 'new') {
-        const { id, ...rest } = post
-        await addDoc(collection(db, postCollection), rest)
-        router.push('/')
-      } else {
-        const updatePost = async (post: Post) => {
-          await updateDoc(doc(db, postCollection, post.id), {
-            title: post.title,
-            content: post.content,
-            updatedAt: Timestamp.fromDate(new Date()),
-            updatedBy: {
-              id: user?.id,
-              name: user?.name,
-              email: user?.email
-            }
+    try {
+      if (post) {
+        if (mode == 'new') {
+          const { id, tags, ...rest } = post
+          const snapShot = await addDoc(collection(db, postCollection), rest)
+
+          const batch = writeBatch(db);
+          const postRef = doc(db, postCollection, snapShot.id)
+          const tagRef = doc(collection(postRef, tagCollection))
+
+          tags.map(tag => {
+            batch.set(tagRef, tag)
           })
+          await batch.commit();
+          router.push('/')
+        } else {
+          const updatePost = async (post: Post) => {
+            await updateDoc(doc(db, postCollection, post.id), {
+              title: post.title,
+              content: post.content,
+              updatedAt: Timestamp.fromDate(new Date()),
+              updatedBy: {
+                id: user?.id,
+                name: user?.name,
+                email: user?.email
+              }
+            })
+          }
+          updatePost(post)
+          router.push('/')      
         }
-        updatePost(post)
-        router.push('/')      
       }
+    } catch (err) {
+      console.error(err)
     }
   }
 
@@ -113,7 +126,6 @@ const EditPost: FC<pageProps> = ({ params }) => {
     return <p>Loading...</p>
   }
 
-  console.log('rerender')
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="max-w-8xl w-full font-mono text-sm">

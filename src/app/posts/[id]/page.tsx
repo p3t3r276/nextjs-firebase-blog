@@ -12,8 +12,8 @@ interface pageProps {
 }
 
 const Post: FC<pageProps> = ({ params }) => {
-  const [loading, setLoading] = useState(false);
-  const [post, setPost] = useState<Post>()
+  const [loading, setLoading] = useState(true);
+  const [post, setPost] = useState<Post | null>(null)
   useEffect(() => {
     async function getPostById(id: string) {
       const snapshot = await getDoc(doc(db, postCollection, params.id))

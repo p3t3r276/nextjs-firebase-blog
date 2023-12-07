@@ -27,7 +27,10 @@ export const Form: FC<pageProps> = ({
   }
 
   const handleEditor = (value: any) => handleChange('content', value)
-  const handleSlection = (value: any) => handleChange('tags', value)
+  const handleSlection = (value: any) => {
+    let valueToSubmit: Tag[] = (value as Item[]).map(item => Object.assign({ id: item.value, name: item.label }, {}))
+    handleChange('tags', valueToSubmit)
+  }
 
   const selectItems: Item[] = tags.map(t => Object.assign({ value: t.id, label: t.name }, {}))
   const defaultValue = post && post.tags.length > 0 ? post.tags.map(t => Object.assign({ value: t.id, label: t.name }, {})) : []
@@ -55,21 +58,20 @@ export const Form: FC<pageProps> = ({
             <div className="col-span-1">
               {/* upload image button */}
               {/* display image */}
-              {/* Tag input */}
-              <div className="m-4">
-              <CreatableSelect 
+              <div>
+                <CreatableSelect 
                   options={selectItems} 
                   isMulti={true}
                   name="tags"
                   onChange={(val) => handleSlection(val)} 
                   defaultValue={defaultValue} /> 
               </div>
-              <div className="w-full text-center">
+              <div className="mt-4">
                 <button 
-                  className='text-white bg-slate-950 hover:bg-slate-900 p-3 text-xl rounded-lg'
+                  className='text-white bg-slate-950 hover:bg-slate-900 p-3 text-xl rounded-lg w-full'
                   type="submit">Post</button>
                 </div>
-              <div className="pl-10  mt-4">
+              <div className="mt-4">
                 <p>Created By: {post.createdBy?.name} at {dateTransform(post.createdAt)}</p>
                 <p>Updated By: {post.updatedBy?.name} at {dateTransform(post.updatedAt)}</p>
               </div>
@@ -78,7 +80,7 @@ export const Form: FC<pageProps> = ({
         </form>
         
       </div>)
-    : ''}
+    : <p>Cannot find post data</p>}
     </>
   )
 }
