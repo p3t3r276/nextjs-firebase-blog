@@ -2,13 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { AiTwotoneEdit } from 'react-icons/ai'
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { Post } from '@/utils/post.model';
 import { db } from '@/db/firebase';
-import { postCollection } from '@/utils/constants';
+import { postCollection, tagCollection } from '@/utils/constants';
 import { durationFromNow } from '@/utils/dateTransform';
 
 export const PostList = () => {
@@ -28,8 +28,29 @@ export const PostList = () => {
     })
   }, [])
 
-  const removePost = async (id: string) => {
-    await deleteDoc(doc(db, postCollection, id))
+  const removePost = async (postId: string) => {
+    // delete subcollection from web client is not recommended
+    // await deleteDoc(doc(db, postCollection, postId))
+    await fetch('/api/posts', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ postId }),
+    })
+    .then(response => {
+      console.log(response)
+    })
+    .catch(error => {
+      console.log(error)
+    });
+    // await fetch('/api/posts')
+    // .then(response => {
+    //   console.log(response)
+    // })
+    // .catch(error => {
+    //   console.log(error)
+    // });
   }
 
   return (
