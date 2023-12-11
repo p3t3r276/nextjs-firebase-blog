@@ -115,25 +115,28 @@ const EditPost: FC<pageProps> = ({ params }) => {
           }
 
           const updatePost = async (post: Post) => {
-            const tagsDataFromServer = await getTagsByPostId(post.id);
+            const postTagsDataFromServer = await getTagsByPostId(post.id);
             
             /* update tags */
             // add new tags
-            let addedTags = post.tags.filter(tag => !tagsDataFromServer.includes(tag))
+            let addedTags = post.tags.filter(tag => tags.includes(tag) && !postTagsDataFromServer.includes(tag))
             // create new tags and add
             let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
             // delete tags
-            let deletedTags = tagsDataFromServer.filter(tag => !post.tags.includes(tag))
-
+            let deletedTags = postTagsDataFromServer.filter(tag => !post.tags.includes(tag))
+            
             if (newlyCreatedTags.length > 0) {
               // create new tags
               const newTagsWriteBatch = writeBatch(db);
 
-              newlyCreatedTags.map(tag => {
+              newlyCreatedTags = newlyCreatedTags.map(tag => {
                 const tagRef = doc(collection(db, tagCollection));
                 newTagsWriteBatch.set(tagRef, { name: tag.name })
+                return Object.assign({}, tag, { id : tagRef.id })
               })
               await newTagsWriteBatch.commit();
+
+              addedTags.push(...newlyCreatedTags)
             }
 
             await updateDoc(doc(db, postCollection, post.id), {
@@ -147,23 +150,24 @@ const EditPost: FC<pageProps> = ({ params }) => {
               }
             })
 
-            const batch = writeBatch(db);
+            const updateTagsSubCol = writeBatch(db);
             const postRef = doc(db, postCollection, post.id)
             const tagSubColRef = collection(postRef, tagCollection)
 
             deletedTags.map(tag => {
-              batch.delete(doc(tagSubColRef, tag.id));
+              updateTagsSubCol.delete(doc(tagSubColRef, tag.id));
             })
 
+            console.log(addedTags)
             addedTags.map(tag => {
-              batch.set(doc(tagSubColRef), { name: tag.name })
+              updateTagsSubCol.set(doc(tagSubColRef), { name: tag.name })
             })
 
-            await batch.commit();
+            await updateTagsSubCol.commit();
           }
 
           await updatePost(post)
-          // router.push('/')      
+          router.push('/')      
         }
       }
     } catch (err) {
