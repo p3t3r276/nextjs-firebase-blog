@@ -56,7 +56,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
         router.refresh();
       }
     });
-}, [user]);
+  }, [user]);
 
   return (<AuthContext.Provider value={{user, authLoading, googleSignIn, logOut }}>{children}</AuthContext.Provider>)
 }

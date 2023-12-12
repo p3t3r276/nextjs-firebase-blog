@@ -1,11 +1,12 @@
 'use client'
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { collection, doc, getDoc, limit, onSnapshot, query } from "firebase/firestore";
 
 import { Post, Tag } from '../../../utils/post.model'
 import { db } from "@/db/firebase";
 import { postCollection, tagCollection } from "@/utils/constants";
 import { dateTransform } from "@/utils/dateTransform";
+import { getPostById } from "@/utils/postsService";
 
 interface pageProps {
   params: { id: string }
@@ -13,31 +14,16 @@ interface pageProps {
 
 const Post: FC<pageProps> = ({ params }) => {
   const [loading, setLoading] = useState(true);
-  const [post, setPost] = useState<Post | null>(null)
+  const [post, setPost] = useState<Post>()
+
+  const getPostData =useCallback(async (postId: string) => {
+    await getPostById(postId)
+  }, [])
+
   useEffect(() => {
-    async function getPostById(id: string) {
-      const snapshot = await getDoc(doc(db, postCollection, params.id))
-      if (snapshot.exists()) {
-        const postData: Post = snapshot.data() as any;
-        postData.id = snapshot.id
-        
-        // get tags data
-        // Query the tags subcollection
-        const tagsQuerySnapshot = query(collection(db, `${postCollection}/${snapshot.id}/${tagCollection}`))
-        
-        const unsubscribe = onSnapshot(tagsQuerySnapshot, (querySnapshot) => {
-          let tags: Tag[] = [];
-          querySnapshot.forEach(doc => {
-            tags.push({ ...doc.data() as any, id: doc.id})
-          })
-          setPost({ ...snapshot.data() as any, id: snapshot.id, tags  })
-          return () => unsubscribe()
-        })        
-      }
-    }
     try {
       setLoading(true)
-      getPostById(params.id)
+      getPostData(params.id)
     } catch (error) {
       console.error(error)
     } finally {

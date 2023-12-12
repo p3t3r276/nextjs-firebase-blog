@@ -1,14 +1,16 @@
 'use client'
-import { FC, FormEvent, useEffect, useState } from "react";
+import { FC, FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Timestamp, addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, writeBatch } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, getDocs, updateDoc, writeBatch } from "firebase/firestore";
 
 import { db } from "@/db/firebase";
 import { postCollection, tagCollection } from "@/utils/constants";
 import { UserAuth } from "@/context/AuthContext";
-import { Post, Tag } from "@/utils/post.model";
+import { EmptyPost, Post, Tag } from "@/utils/post.model";
 import { BlogUser } from "@/utils/user.model";
 import { Form } from "@/components/postForm";
+import { createPost, getPostById, updatePost } from "@/utils/postsService";
+import { getAllTags } from "@/utils/tagsService";
 
 interface pageProps {
   params: { id: string }
@@ -22,28 +24,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
   const [mode, setMode] = useState('new')
   const [tags, setTags] = useState<Tag[]>([])
 
-  useEffect(() => {
-    async function getPostById(id: string) {
-      const snapshot = await getDoc(doc(db, postCollection, params.id))
-      if (snapshot.exists()) {
-        const postData: Post = snapshot.data() as any;
-        postData.id = snapshot.id
-        
-        // get tags data
-        // Query the tags subcollection
-        const tagsQuerySnapshot = query(collection(db, `${postCollection}/${snapshot.id}/${tagCollection}`))
-        
-        const unsubscribe = onSnapshot(tagsQuerySnapshot, (querySnapshot) => {
-          let tags: Tag[] = [];
-          querySnapshot.forEach(doc => {
-            tags.push({ ...doc.data() as any, id: doc.id})
-          })
-          setPost({ ...snapshot.data() as any, id: snapshot.id, tags  })
-          return () => unsubscribe()
-        })
-      }
-    }
-    
+  const getData = useCallback(async (postId: string) => {
     if (params.id === 'new') {  
       setMode('new')
       const newDate  = Timestamp.fromDate(new Date())
@@ -52,12 +33,15 @@ const EditPost: FC<pageProps> = ({ params }) => {
         name: user?.name,
         email: user?.email
       }
-      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: currentBlogUser, updatedBy: currentBlogUser, tags: [] })
+      setPost(EmptyPost(currentBlogUser, newDate))
     } else {
       setMode('edit');
       try {
         setLoading(true)
-        getPostById(params.id)
+        const postData  = await getPostById(postId);
+        if (postData) {
+          setPost(postData)
+        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -66,17 +50,14 @@ const EditPost: FC<pageProps> = ({ params }) => {
     }
   }, [])
 
-  useEffect(() => {
-    const q = query(collection(db, tagCollection))
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let tagArr: Tag[] = [];
+  const getAllTagsCallback = useCallback(async () => {
+    const allTags = getAllTags()
+    setTags(allTags)
+  }, [tags])
 
-      querySnapshot.forEach((doc) => {
-        tagArr.push({ ...doc.data() as any, id: doc.id})
-      })
-      setTags(tagArr)
-      return () => unsubscribe();
-    })
+  useEffect(() => {
+    getData(params.id)
+    getAllTagsCallback()
   }, [])
   
   function handleChange(name: string, value: any) {
@@ -88,85 +69,10 @@ const EditPost: FC<pageProps> = ({ params }) => {
     try {
       if (post) {
         if (mode == 'new') {
-          const { id, tags, ...rest } = post
-          const snapShot = await addDoc(collection(db, postCollection), rest)
-          console.log(tags)
-          const batch = writeBatch(db);
-          const postRef = doc(db, postCollection, snapShot.id)
-
-          tags.map(tag => {
-            let tagRef = doc(collection(postRef, tagCollection))
-            batch.set(tagRef, tag)
-          })
-          await batch.commit();
+          await createPost(post)
           router.push('/')
         } else {
-          const getTagsByPostId = async (id: string) => {
-            let result: Tag[] = [];
-            
-            const tagsSubColRef = collection(db, `${postCollection}/${id}/${tagCollection}`)
-            
-            const snapShot= await getDocs(tagsSubColRef)
-            snapShot.docs.forEach(doc => {
-              result.push({ ...doc.data() as any, id: doc.id})
-            })
-
-            return result;
-          }
-
-          const updatePost = async (post: Post) => {
-            const postTagsDataFromServer = await getTagsByPostId(post.id);
-            
-            /* update tags */
-            // add new tags
-            let addedTags = post.tags.filter(tag => tags.includes(tag) && !postTagsDataFromServer.includes(tag))
-            // create new tags and add
-            let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
-            // delete tags
-            let deletedTags = postTagsDataFromServer.filter(tag => !post.tags.includes(tag))
-            
-            if (newlyCreatedTags.length > 0) {
-              // create new tags
-              const newTagsWriteBatch = writeBatch(db);
-
-              newlyCreatedTags = newlyCreatedTags.map(tag => {
-                const tagRef = doc(collection(db, tagCollection));
-                newTagsWriteBatch.set(tagRef, { name: tag.name })
-                return Object.assign({}, tag, { id : tagRef.id })
-              })
-              await newTagsWriteBatch.commit();
-
-              addedTags.push(...newlyCreatedTags)
-            }
-
-            await updateDoc(doc(db, postCollection, post.id), {
-              title: post.title,
-              content: post.content,
-              updatedAt: Timestamp.fromDate(new Date()),
-              updatedBy: {
-                id: user?.id,
-                name: user?.name,
-                email: user?.email
-              }
-            })
-
-            const updateTagsSubCol = writeBatch(db);
-            const postRef = doc(db, postCollection, post.id)
-            const tagSubColRef = collection(postRef, tagCollection)
-
-            deletedTags.map(tag => {
-              updateTagsSubCol.delete(doc(tagSubColRef, tag.id));
-            })
-
-            console.log(addedTags)
-            addedTags.map(tag => {
-              updateTagsSubCol.set(doc(tagSubColRef), { name: tag.name })
-            })
-
-            await updateTagsSubCol.commit();
-          }
-
-          await updatePost(post)
+          await updatePost(post, tags, user)
           router.push('/')      
         }
       }
