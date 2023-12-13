@@ -14,13 +14,14 @@ export const PostList = () => {
   const [posts, setPosts] = useState<Post[]>([])
 
   useEffect(() => {
-    getPost().then(data => { 
-      console.log(data)
-      setPosts(data) }).catch(error => console.error(error))
+    getPosts().then(data => {
+      setPosts(data)
+    })
+    .catch((err) => console.error(err))
   }, [])
 
-  const getPost = useCallback(async () => {
-    return getAllPosts()
+  const getPosts = useCallback(async () => {
+    return await getAllPosts()
   }, [])
 
   const removePost = useCallback(async (postId: string) => {

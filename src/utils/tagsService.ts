@@ -1,4 +1,4 @@
-import { collection, getDocs, onSnapshot, query } from "firebase/firestore";
+import { collection, doc, getDocs, onSnapshot, query, writeBatch } from "firebase/firestore";
 import { Tag } from "./post.model";
 import { db } from "@/db/firebase";
 import { postCollection, tagCollection } from "./constants";
@@ -26,4 +26,16 @@ export const getTagsByPostId = async (id: string) => {
     })
 
     return result;
+}
+
+export const createTags = async (tags: Tag[]) => {
+    const newTagsWriteBatch = writeBatch(db);
+
+    tags = tags.map(tag => {
+        const tagRef = doc(collection(db, tagCollection));
+        newTagsWriteBatch.set(tagRef, { name: tag.name })
+        return Object.assign({}, tag, { id : tagRef.id })
+    })
+    await newTagsWriteBatch.commit();
+    return tags
 }

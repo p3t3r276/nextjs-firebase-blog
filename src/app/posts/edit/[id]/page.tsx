@@ -1,10 +1,8 @@
 'use client'
 import { FC, FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Timestamp, addDoc, collection, doc, getDocs, updateDoc, writeBatch } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 
-import { db } from "@/db/firebase";
-import { postCollection, tagCollection } from "@/utils/constants";
 import { UserAuth } from "@/context/AuthContext";
 import { EmptyPost, Post, Tag } from "@/utils/post.model";
 import { BlogUser } from "@/utils/user.model";
