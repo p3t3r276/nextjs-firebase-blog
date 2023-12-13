@@ -1,29 +1,29 @@
 'use client'
-import { FC, useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { FC, useCallback, useEffect, useState } from "react";
 
 import { Post } from '../../../utils/post.model'
-import { db } from "@/db/firebase";
-import { postCollection } from "@/utils/constants";
 import { dateTransform } from "@/utils/dateTransform";
+import { getPostById } from "@/utils/postsService";
 
 interface pageProps {
   params: { id: string }
 }
 
 const Post: FC<pageProps> = ({ params }) => {
-  const [loading, setLoading] = useState(false);
-  const [post, setPost] = useState<Post>()
+  const [loading, setLoading] = useState(true);
+  const [post, setPost] = useState<Post | null>()
+
+  const getPostData = useCallback(async (postId: string) => {
+    return await getPostById(postId)
+  }, [])
+
   useEffect(() => {
-    async function getPostById(id: string) {
-      const snapshot = await getDoc(doc(db, postCollection, params.id))
-      if (snapshot.exists()) { 
-          setPost({ ...snapshot.data() as any, id: snapshot.id  })
-       }
-    }
     try {
       setLoading(true)
-      getPostById(params.id)
+      getPostData(params.id).then(data => {
+        setPost(data)
+      })
+      .catch(err => console.error(err))
     } catch (error) {
       console.error(error)
     } finally {
@@ -35,19 +35,26 @@ const Post: FC<pageProps> = ({ params }) => {
     return <p>Loading...</p>
   }
 
-  if (!post) {
+  if (!post && !loading) {
     return <p>Cannot find post</p>;
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full font-mono text-sm">
-        <h2 className="text-4xl text-center mb-8">{post.title}</h2>
-        <div dangerouslySetInnerHTML={{ __html: post.content }}>
-        </div>
-        <div className="mt-4">
-          Created By: {post.createdBy?.name} at {dateTransform(post.createdAt)} <br /> 
-          Updated By: {post.updatedBy?.name} at {dateTransform(post.updatedAt)}
-        </div>
+        {post ? (
+          <>
+            <h2 className="text-4xl text-center mb-8">{post.title}</h2>
+            <ul>
+              {post.tags.map(tag => <li key={tag.id}>{tag.name}</li>)}
+            </ul>
+            <div dangerouslySetInnerHTML={{ __html: post.content }}>
+            </div>
+            <div className="mt-4">
+              Created By: {post.createdBy?.name} at {dateTransform(post.createdAt)} <br /> 
+              Updated By: {post.updatedBy?.name} at {dateTransform(post.updatedAt)}
+            </div>
+          </>
+        ) : ''}
       </div>
     </main>
   )

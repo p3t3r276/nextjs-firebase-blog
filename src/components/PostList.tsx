@@ -1,36 +1,32 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { AiTwotoneEdit } from 'react-icons/ai'
 import { FaTrashAlt } from 'react-icons/fa'
 
 import { Post } from '@/utils/post.model';
-import { db } from '@/db/firebase';
-import { postCollection } from '@/utils/constants';
 import { durationFromNow } from '@/utils/dateTransform';
+import { getAllPosts, removePostById } from '@/utils/postsService';
 
 export const PostList = () => {
   const router = useRouter()
   const [posts, setPosts] = useState<Post[]>([])
 
   useEffect(() => {
-    const q = query(collection(db, postCollection), orderBy('updatedAt', 'desc'))
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let postArr: Post[] = [];
-
-      querySnapshot.forEach((doc) => {
-        postArr.push({ ...doc.data() as any, id: doc.id})
-      })
-      setPosts(postArr)
-      return () => unsubscribe();
+    getPosts().then(data => {
+      setPosts(data)
     })
+    .catch((err) => console.error(err))
   }, [])
 
-  const removePost = async (id: string) => {
-    await deleteDoc(doc(db, postCollection, id))
-  }
+  const getPosts = useCallback(async () => {
+    return await getAllPosts()
+  }, [])
+
+  const removePost = useCallback(async (postId: string) => {
+    await removePostById(postId)
+  }, [])
 
   return (
     <div className='group flex flex-col gap-2 mt-4'>
@@ -59,3 +55,4 @@ export const PostList = () => {
     </div>
   )
 }
+

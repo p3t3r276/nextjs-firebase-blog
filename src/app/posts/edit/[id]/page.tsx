@@ -1,14 +1,14 @@
 'use client'
-import { FC, FormEvent, useEffect, useState } from "react";
-import { Form } from "@/components/postForm";
+import { FC, FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Post } from "@/utils/post.model";
-import { Timestamp, addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 
-import { db } from "@/db/firebase";
-import { postCollection } from "@/utils/constants";
 import { UserAuth } from "@/context/AuthContext";
+import { EmptyPost, Post, Tag } from "@/utils/post.model";
 import { BlogUser } from "@/utils/user.model";
+import { Form } from "@/components/postForm";
+import { createPost, getPostById, updatePost } from "@/utils/postsService";
+import { getAllTags } from "@/utils/tagsService";
 
 interface pageProps {
   params: { id: string }
@@ -20,29 +20,26 @@ const EditPost: FC<pageProps> = ({ params }) => {
   const [loading, setLoading] = useState(false);
   const [post, setPost] = useState<Post>();
   const [mode, setMode] = useState('new')
+  const [tags, setTags] = useState<Tag[]>([])
 
-  useEffect(() => {
-    async function getPostById(id: string) {
-      const snapshot = await getDoc(doc(db, postCollection, params.id))
-      if (snapshot.exists()) {
-        setPost({ ...snapshot.data() as any, id: snapshot.id  })
-      }
-    }
-    
+  const getData = useCallback(async (postId: string) => {
     if (params.id === 'new') {  
       setMode('new')
       const newDate  = Timestamp.fromDate(new Date())
       const currentBlogUser: BlogUser = {
-        id: user.uid,
-        name: user.displayName,
-        email: user.email
+        id: user?.id,
+        name: user?.name,
+        email: user?.email
       }
-      setPost({ id: "", title: '', content: '', createdAt: newDate, updatedAt: newDate, createdBy: currentBlogUser, updatedBy: currentBlogUser })
+      setPost(EmptyPost(currentBlogUser, newDate))
     } else {
       setMode('edit');
       try {
         setLoading(true)
-        getPostById(params.id)
+        const postData  = await getPostById(postId);
+        if (postData) {
+          setPost(postData)
+        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -50,45 +47,47 @@ const EditPost: FC<pageProps> = ({ params }) => {
       }
     }
   }, [])
+
+  const getAllTagsCallback = useCallback(async () => {
+    const allTags = await getAllTags()
+    setTags(allTags)
+  }, [tags])
+
+  useEffect(() => {
+    getData(params.id)
+    getAllTagsCallback()
+  }, [])
   
   function handleChange(name: string, value: any) {
-      setPost({ ...post, [name]: value } as any);
+    setPost({ ...post, [name]: value } as any);
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (post) {
-      if (mode == 'new') {
-        const { id, ...rest } = post
-        await addDoc(collection(db, postCollection), rest)
-        router.push('/')
-      } else {
-        const updatePost = async (post: Post) => {
-          await updateDoc(doc(db, postCollection, post.id), {
-            title: post.title,
-            content: post.content,
-            updatedAt: Timestamp.fromDate(new Date()),
-            updatedBy: {
-              id: user.uid,
-              name: user.displayName,
-              email: user.email
-            }
-          })
+    try {
+      if (post) {
+        if (mode == 'new') {
+          await createPost(post, tags)
+          router.push('/')
+        } else {
+          await updatePost(post, tags, user)
+          router.push('/')      
         }
-        updatePost(post)
-        router.push('/')      
       }
+    } catch (err) {
+      console.error(err)
     }
   }
 
   if (loading) {
     return <p>Loading...</p>
   }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full font-mono text-sm">
-      <h2 className='text-center text-4xl'>{mode === 'new' ? 'New Post' : 'Edit Post'}</h2>
-        <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} />
+      <div className="max-w-8xl w-full font-mono text-sm">
+        <h2 className='text-center text-4xl'>{mode === 'new' ? 'New Post' : 'Edit Post'}</h2>
+        <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} tags={tags} />
       </div>
     </main>
   )
