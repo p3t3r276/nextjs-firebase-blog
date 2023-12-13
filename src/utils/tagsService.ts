@@ -3,14 +3,12 @@ import { Tag } from "./post.model";
 import { db } from "@/db/firebase";
 import { postCollection, tagCollection } from "./constants";
 
-export const getAllTags = () => {
+export const getAllTags = async () => {
     let tagArr: Tag[] = [];
     const q = query(collection(db, tagCollection))
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        querySnapshot.forEach((doc) => {
+    const querySnapshot = await getDocs(q)
+    querySnapshot.forEach((doc) => {
         tagArr.push({ ...doc.data() as any, id: doc.id})
-        })
-        return () => unsubscribe();
     })
     return tagArr;
 }

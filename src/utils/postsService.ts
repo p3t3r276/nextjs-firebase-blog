@@ -44,18 +44,30 @@ export const getPostById = async (id: string) => {
 }
 
 
-export const createPost = async (post: Post) => {
+export const createPost = async (post: Post, allTags: Tag[]) => {
   try {
     const { id, tags, ...rest } = post
     const snapShot = await addDoc(collection(db, postCollection), rest)
-    
+
+    /* update tags */
+    // add new tags
+    let addedTags = post.tags.filter(tag => allTags.includes(tag))
+    // create new tags and add
+    let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
+  
+    if (newlyCreatedTags.length > 0) {
+      // create new tags and add to post
+      const newTags = await createTags(newlyCreatedTags)
+      addedTags.push(...newTags)
+    }
     const batch = writeBatch(db);
     const postRef = doc(db, postCollection, snapShot.id)
-  
-    tags.map(tag => {
-      let tagRef = doc(collection(postRef, tagCollection))
-      batch.set(tagRef, tag)
+    const tagSubColRef = collection(postRef, tagCollection)
+
+    addedTags.map(tag => {
+      batch.set(doc(tagSubColRef), { name: tag.name })
     })
+
     await batch.commit();
   } catch(err) {
     console.error(err)

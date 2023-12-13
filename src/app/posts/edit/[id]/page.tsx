@@ -49,7 +49,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
   }, [])
 
   const getAllTagsCallback = useCallback(async () => {
-    const allTags = getAllTags()
+    const allTags = await getAllTags()
     setTags(allTags)
   }, [tags])
 
@@ -67,7 +67,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
     try {
       if (post) {
         if (mode == 'new') {
-          await createPost(post)
+          await createPost(post, tags)
           router.push('/')
         } else {
           await updatePost(post, tags, user)
