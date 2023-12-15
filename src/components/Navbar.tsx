@@ -39,7 +39,7 @@ export const Navbar: FC = () => {
             <span>Welome, {user.name}</span>
           </div>
           <div className="ml-4">
-            <Image src={user.photoURL as string} height={8} width={8} alt="User Photo" unoptimized className="h-8 w-8 rounded-full" />
+            <Image src={user.photoURL as string} height={8} width={8} alt="User Photo" unoptimized className="h-8 w-8 rounded-full" referrerPolicy="no-referrer" />
           </div>
           <div className="ml-4">
             <button onClick={handleSignOut} >Log out</button>

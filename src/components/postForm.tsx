@@ -21,6 +21,7 @@ export const Form: FC<pageProps> = ({
   handleChange, 
   handleSubmit,
   tags }) => {
+  const [file, setFile] = useState<any>(undefined);
 
   const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     handleChange(e.target.name, e.target.value)
@@ -30,6 +31,15 @@ export const Form: FC<pageProps> = ({
   const handleSlection = (value: any) => {
     let valueToSubmit: Tag[] = (value as Item[]).map(item => Object.assign({ id: item.value, name: item.label }, {}))
     handleChange('tags', valueToSubmit)
+  }
+
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.files);
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(URL.createObjectURL(e.target.files[0]));
+    } else {
+      setFile(undefined)
+    }
   }
 
   const selectItems: Item[] = tags.map(t => Object.assign({ value: t.id, label: t.name }, {}))
@@ -56,8 +66,6 @@ export const Form: FC<pageProps> = ({
                 </div>
             </div>
             <div className="col-span-1">
-              {/* upload image button */}
-              {/* display image */}
               <div>
                 <CreatableSelect 
                   options={selectItems} 
@@ -65,6 +73,20 @@ export const Form: FC<pageProps> = ({
                   name="tags"
                   onChange={(val) => handleSlection(val)} 
                   defaultValue={defaultValue} /> 
+              </div>
+              <div className="mt-4">
+                <input 
+                  className='text-white
+                  file:mr-5 file:py-2 file:px-6
+                  file:rounded-full file:border-0
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:cursor-pointer hover:file:bg-amber-50
+                  hover:file:text-amber-700
+                  p-3 text-xl w-full'
+                  type="file"
+                  name='coverImage' 
+                  onChange={handleImageUpload} />
+                <img className="mt-4" src={file} />
               </div>
               <div className="mt-4">
                 <button 
