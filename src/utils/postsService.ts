@@ -1,5 +1,7 @@
 import { Firestore, Query, Timestamp, addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, updateDoc, writeBatch } from "firebase/firestore";
-import { db } from "@/db/firebase";
+import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+
+import { db, storage } from "@/db/firebase";
 import { postCollection, tagCollection } from "./constants";
 import { Post, Tag } from "./post.model";
 import { createTags, getTagsByPostId } from "./tagsService";
@@ -176,4 +178,28 @@ async function deleteQueryBatch(db: Firestore, query: Query, resolve: (value: un
   process.nextTick(() => {
     deleteQueryBatch(db, query, resolve);
   });
+}
+
+export const uploadCoverImage = (file: File) => { // currently only one image
+  if (!file) return;
+  return new Promise((resolve, reject) => {
+    const storageRef = ref(storage, `cover/${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on("state_changed",
+        (snapshot) => {
+          const progress =
+            Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            console.log(progress);
+        },
+        (error) => {
+          reject(error);
+        },
+        () => {
+          const url = getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
+            resolve(downloadURL)
+          }); 
+        }
+      );
+  })
 }
