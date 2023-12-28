@@ -1,5 +1,6 @@
 'use client'
 import { FC, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 
 import { Post } from '../../../utils/post.model'
 import { dateTransform } from "@/utils/dateTransform";
@@ -55,6 +56,10 @@ const Post: FC<pageProps> = ({ params }) => {
             </div>
           </>
         ) : ''}
+        <div className="mt-4">
+          <Link href={'/'}
+            className='p-3 text-xl rounded-lg w-full'>Back</Link>
+      </div>
       </div>
     </main>
   )

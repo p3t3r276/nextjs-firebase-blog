@@ -6,6 +6,7 @@ import CreatableSelect from 'react-select/creatable';
 import { dateTransform } from "@/utils/dateTransform";
 import { Post, Tag } from "@/utils/post.model";
 import { Item } from "@/utils/item.model";
+import Link from "next/link";
 
 interface pageProps {
   post?: Post,
@@ -92,7 +93,11 @@ export const Form: FC<pageProps> = ({
                 <button 
                   className='text-white bg-slate-950 hover:bg-slate-900 p-3 text-xl rounded-lg w-full'
                   type="submit">Post</button>
-                </div>
+              </div>
+              <div className="mt-4">
+                <Link href={'/'}
+                className="block text-center p-3 text-xl rounded-lg w-full">Back</Link>
+              </div>
               <div className="mt-4">
                 <p>Created By: {post.createdBy?.name} at {dateTransform(post.createdAt)}</p>
                 <p>Updated By: {post.updatedBy?.name} at {dateTransform(post.updatedAt)}</p>
