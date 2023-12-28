@@ -7,7 +7,7 @@ import { UserAuth } from "@/context/AuthContext";
 import { EmptyPost, Post, Tag } from "@/utils/post.model";
 import { BlogUser } from "@/utils/user.model";
 import { Form } from "@/components/postForm";
-import { createPost, getPostById, updatePost } from "@/utils/postsService";
+import { createPost, getPostById, updatePost, uploadCoverImage } from "@/utils/postsService";
 import { getAllTags } from "@/utils/tagsService";
 
 interface pageProps {
@@ -21,10 +21,10 @@ const EditPost: FC<pageProps> = ({ params }) => {
   const [post, setPost] = useState<Post>();
   const [mode, setMode] = useState('new')
   const [tags, setTags] = useState<Tag[]>([])
+  const [progresspercent, setProgresspercent] = useState(0);
 
   const getData = useCallback(async (postId: string) => {
     if (params.id === 'new') {  
-      setMode('new')
       const newDate  = Timestamp.fromDate(new Date())
       const currentBlogUser: BlogUser = {
         id: user?.id,
@@ -33,7 +33,6 @@ const EditPost: FC<pageProps> = ({ params }) => {
       }
       setPost(EmptyPost(currentBlogUser, newDate))
     } else {
-      setMode('edit');
       try {
         setLoading(true)
         const postData  = await getPostById(postId);
@@ -66,7 +65,10 @@ const EditPost: FC<pageProps> = ({ params }) => {
     e.preventDefault();
     try {
       if (post) {
-        if (mode == 'new') {
+        console.log(post.imageUrl)
+        uploadCoverImage(post.imageUrl as any)?.then(url => console.log(url)).catch(err => console.error(err))
+        return;
+        if (params.id === 'new') {
           await createPost(post, tags)
           router.push('/')
         } else {
