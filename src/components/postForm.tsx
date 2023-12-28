@@ -1,12 +1,12 @@
 'use client'
 import { ChangeEvent, FC, FormEvent, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import CreatableSelect from 'react-select/creatable';
 
 import { dateTransform } from "@/utils/dateTransform";
 import { Post, Tag } from "@/utils/post.model";
 import { Item } from "@/utils/item.model";
-import Link from "next/link";
 
 interface pageProps {
   post?: Post,
@@ -22,7 +22,8 @@ export const Form: FC<pageProps> = ({
   handleChange, 
   handleSubmit,
   tags }) => {
-  const [file, setFile] = useState<any>(undefined);
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [progresspercent, setProgresspercent] = useState(0);
 
   const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     handleChange(e.target.name, e.target.value)
@@ -35,11 +36,12 @@ export const Form: FC<pageProps> = ({
   }
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.files);
     if (e.target.files && e.target.files.length > 0) {
-      setFile(URL.createObjectURL(e.target.files[0]));
+      handleChange('imageUrl', e.target.files[0])
+      setImgUrl(URL.createObjectURL(e.target.files[0]))
     } else {
-      setFile(undefined)
+      handleChange('imageUrl', null)
+      setImgUrl(null)
     }
   }
 
@@ -85,9 +87,18 @@ export const Form: FC<pageProps> = ({
                   hover:file:text-amber-700
                   p-3 text-xl w-full'
                   type="file"
-                  name='coverImage' 
+                  name='imageUrl' 
                   onChange={handleImageUpload} />
-                <img className="mt-4" src={file} />
+                {
+                  !imgUrl &&
+                  <div className='outerbar'>
+                    <div className='innerbar' style={{ width: `${progresspercent}%` }}>{progresspercent}%</div>
+                  </div>
+                }
+                {
+                  imgUrl &&
+                  <img src={imgUrl} alt='uploaded file' height={200} />
+                }
               </div>
               <div className="mt-4">
                 <button 
