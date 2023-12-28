@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Post } from '../../../utils/post.model'
 import { dateTransform } from "@/utils/dateTransform";
 import { getPostById } from "@/utils/postsService";
+import Image from "next/image";
 
 interface pageProps {
   params: { id: string }
@@ -40,10 +41,16 @@ const Post: FC<pageProps> = ({ params }) => {
     return <p>Cannot find post</p>;
   }
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between pt-12">
       <div className="z-10 max-w-5xl w-full font-mono text-sm">
         {post ? (
           <>
+            <div >
+            {post.imageUrl ? <Image src={post.imageUrl} alt={post.title} width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: '100%', height: 'auto' }} /> : '' }
+            </div>
             <h2 className="text-4xl text-center mb-8">{post.title}</h2>
             <ul>
               {post.tags.map(tag => <li key={tag.id}>{tag.name}</li>)}

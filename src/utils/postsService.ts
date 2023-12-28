@@ -180,8 +180,8 @@ async function deleteQueryBatch(db: Firestore, query: Query, resolve: (value: un
   });
 }
 
-export const uploadCoverImage = (file: File) => { // currently only one image
-  if (!file) return;
+export const uploadCoverImage = (file: File): Promise<string> => { // currently only one image
+  if (!file) throw new Error("There must be file.");
   return new Promise((resolve, reject) => {
     const storageRef = ref(storage, `cover/${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
@@ -196,7 +196,7 @@ export const uploadCoverImage = (file: File) => { // currently only one image
           reject(error);
         },
         () => {
-          const url = getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
+          getDownloadURL(uploadTask.snapshot.ref).then(downloadURL => {
             resolve(downloadURL)
           }); 
         }

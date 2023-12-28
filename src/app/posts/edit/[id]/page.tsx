@@ -19,7 +19,6 @@ const EditPost: FC<pageProps> = ({ params }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [post, setPost] = useState<Post>();
-  const [mode, setMode] = useState('new')
   const [tags, setTags] = useState<Tag[]>([])
   const [progresspercent, setProgresspercent] = useState(0);
 
@@ -66,8 +65,9 @@ const EditPost: FC<pageProps> = ({ params }) => {
     try {
       if (post) {
         console.log(post.imageUrl)
-        uploadCoverImage(post.imageUrl as any)?.then(url => console.log(url)).catch(err => console.error(err))
-        return;
+        const imageUrl =  await Promise.all([uploadCoverImage(post.imageUrl as any)])
+        post.imageUrl = imageUrl[0];
+
         if (params.id === 'new') {
           await createPost(post, tags)
           router.push('/')
@@ -75,6 +75,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
           await updatePost(post, tags, user)
           router.push('/')      
         }
+        
       }
     } catch (err) {
       console.error(err)
@@ -88,7 +89,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="max-w-8xl w-full font-mono text-sm">
-        <h2 className='text-center text-4xl'>{mode === 'new' ? 'New Post' : 'Edit Post'}</h2>
+        <h2 className='text-center text-4xl'>{params.id === 'new' ? 'New Post' : 'Edit Post'}</h2>
         <Form post={post} handleChange={handleChange} handleSubmit={handleSubmit} tags={tags} />
       </div>
     </main>
