@@ -13,8 +13,8 @@ A [Medium](https://medium.com/) clone built with [Next.js](https://nextjs.org/).
 8. Implement post tag ✅
 9. UI redesign (iteration thought-out project) ✅
 10. Setup firebase Storage ✅
-11. Upload Cover image to Firebase Storage
-12. Display cover image (need design)
+11. Upload Cover image to Firebase Storage ✅
+12. Display cover image (need design) ⭐
 13. Allow comments 
 14. Anonymous user can see comment
 15. Must sign in to comment
