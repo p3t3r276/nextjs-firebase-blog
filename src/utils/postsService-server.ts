@@ -10,7 +10,7 @@ export const getAllPosts = async () => {
   docs.forEach((doc) => {
     let post: Post = Object.assign(<Post>{ id: doc.id }, doc.data())
     post.updatedAt = doc.data().updatedAt.toDate()
-    post.createdAt = doc.data().updatedAt.toDate()
+    post.createdAt = doc.data().createdAt.toDate()
     postArr.push(post)
   })
   return postArr
@@ -18,12 +18,12 @@ export const getAllPosts = async () => {
 
 export const getPostById = async (id: string) => {
   try {
-    let post: Post | null = null
+    let post: Post | null = null;
     const postDoc = await dbAdmin.collection(postCollection).doc(id).get()
     if (postDoc) {
       post = Object.assign(<Post>{ id: postDoc.id }, postDoc.data())
       post.updatedAt = postDoc.data()?.updatedAt.toDate()
-      post.createdAt = postDoc.data()?.updatedAt.toDate()
+      post.createdAt = postDoc.data()?.createdAt.toDate()
       if (post.id) {
         // get tags data
         // Query the tags subcollection

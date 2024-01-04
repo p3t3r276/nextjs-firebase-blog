@@ -8,27 +8,30 @@ import { Item } from "@/utils/item.model";
 
 interface pageProps {
   post?: Post,
-  tags: Tag[],
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => void,
-  handleChange: (name: string, value: any) => void
+  tags: Tag[]
 }
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
 export const Form: FC<pageProps> = ({ 
-  post, 
-  handleChange, 
-  handleSubmit,
+  post,
   tags }) => {
 
   const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    handleChange(e.target.name, e.target.value)
+    // handleChange(e.target.name, e.target.value)
   }
 
-  const handleEditor = (value: any) => handleChange('content', value)
+  const handleEditor = (value: any) => { 
+    // handleChange('content', value)
+
+  }
   const handleSlection = (value: any) => {
     let valueToSubmit: Tag[] = (value as Item[]).map(item => Object.assign({ id: item.value, name: item.label }, {}))
-    handleChange('tags', valueToSubmit)
+    // handleChange('tags', valueToSubmit)
+  }
+
+  const handleSubmit = () => {
+
   }
 
   const selectItems: Item[] = tags.map(t => Object.assign({ value: t.id, label: t.name }, {}))
@@ -70,10 +73,10 @@ export const Form: FC<pageProps> = ({
                   className='text-white bg-slate-950 hover:bg-slate-900 p-3 text-xl rounded-lg w-full'
                   type="submit">Post</button>
                 </div>
-              {/* <div className="mt-4">
-                <p>Created By: {post.createdBy?.name} at {dateTransform(post.createdAt)}</p>
-                <p>Updated By: {post.updatedBy?.name} at {dateTransform(post.updatedAt)}</p>
-              </div> */}
+              <div className="mt-4">
+                <p>Created By: {post.createdBy?.name} at {post.createdAt.toDateString()}</p>
+                <p>Updated By: {post.updatedBy?.name} at {post.updatedAt.toDateString()}</p>
+              </div>
             </div>
           </div>
         </form>

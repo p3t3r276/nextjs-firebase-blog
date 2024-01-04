@@ -6,6 +6,7 @@ import { AiTwotoneEdit } from 'react-icons/ai'
 
 import { Post } from "@/utils/post.model"
 import { removePostById } from "@/utils/postsService"
+import { durationFromNow } from "@/utils/dateUtils"
 
 interface PostItemPageProps {
   post: Post
@@ -21,7 +22,7 @@ export const PostItem: FC<PostItemPageProps> = ({ post }) => {
       <Link href={`/posts/${post.id}`} className='col-span-4 rounded-l-lg bg-slate-400 p-5 text-white my-2'>
         <h2>{post.title}</h2>
         <div>Author: {post.createdBy?.name}</div>
-        <div>Edited by: {post.updatedBy?.name} {JSON.stringify(post.updatedAt)}</div>
+        <div>Edited by: {post.updatedBy?.name} {durationFromNow(post.updatedAt)}</div>
       </Link>
       <Link
         className='flex items-center justify-center bg-blue-500 hover:bg-blue-400 text-white text-xl p-10'

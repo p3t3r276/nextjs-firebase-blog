@@ -2,6 +2,7 @@ import { FC, useCallback, useEffect, useState } from "react";
 
 import { Post } from '../../../utils/post.model'
 import { getPostById } from "@/utils/postsService-server";
+import { dateTransform } from "@/utils/dateUtils";
 
 interface pageProps {
   params: { id: string }
@@ -26,8 +27,8 @@ export default async function Post ({ params }: pageProps) {
             <div dangerouslySetInnerHTML={{ __html: post.content }}>
             </div>
             <div className="mt-4">
-              Created By: {post.createdBy?.name} at {post.createdAt.toDateString()} <br /> 
-              Updated By: {post.updatedBy?.name} at {post.updatedAt.toDateString()}
+              Created By: {post.createdBy?.name} at {dateTransform(post.createdAt, 'DD/MM/yyyy HH:mm')} <br /> 
+              Updated By: {post.updatedBy?.name} at {dateTransform(post.updatedAt, 'DD/MM/yyyy HH:mm')}
             </div>
           </>
         ) : ''}
