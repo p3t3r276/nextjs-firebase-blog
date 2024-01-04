@@ -1,4 +1,3 @@
-'use client'
 import { FC, useCallback, useEffect, useState } from "react";
 
 import { Post } from '../../../utils/post.model'
@@ -9,33 +8,10 @@ interface pageProps {
   params: { id: string }
 }
 
-const Post: FC<pageProps> = ({ params }) => {
-  const [loading, setLoading] = useState(true);
-  const [post, setPost] = useState<Post | null>()
-
-  const getPostData = useCallback(async (postId: string) => {
-    return await getPostById(postId)
-  }, [])
-
-  useEffect(() => {
-    try {
-      setLoading(true)
-      getPostData(params.id).then(data => {
-        setPost(data)
-      })
-      .catch(err => console.error(err))
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false);
-    }
-  }, [])
-
-  if (loading) {
-    return <p>Loading...</p>
-  }
-
-  if (!post && !loading) {
+export default async function Post ({ params }: pageProps) {
+  const post = await getPostById(params.id)
+  console.log(post)
+  if (!post) {
     return <p>Cannot find post</p>;
   }
   return (
@@ -59,5 +35,3 @@ const Post: FC<pageProps> = ({ params }) => {
     </main>
   )
 }
-
-export default Post;

@@ -71,10 +71,10 @@ export const Form: FC<pageProps> = ({
                   className='text-white bg-slate-950 hover:bg-slate-900 p-3 text-xl rounded-lg w-full'
                   type="submit">Post</button>
                 </div>
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <p>Created By: {post.createdBy?.name} at {dateTransform(post.createdAt)}</p>
                 <p>Updated By: {post.updatedBy?.name} at {dateTransform(post.updatedAt)}</p>
-              </div>
+              </div> */}
             </div>
           </div>
         </form>

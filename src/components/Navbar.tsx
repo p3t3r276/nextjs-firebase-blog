@@ -2,26 +2,45 @@
 import { FC } from "react"
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from "next/navigation";
 
-import { UserAuth } from "@/context/AuthContext"
+import { signInWithGoogle, signOut } from "@/db/auth"
+import { BlogUser } from "@/utils/user.model";
 
-export const Navbar: FC = () => {
-  const { user, googleSignIn, logOut } = UserAuth()
+interface NavBarProps {
+  user: BlogUser | null
+}
+
+export const Navbar: FC<NavBarProps> = ({ user }) => {
+  const router = useRouter();
+  // const { user, googleSignIn, logOut } = UserAuth()
+  // const handleSignIn = async () => {
+  //   try {
+  //     await googleSignIn()
+  //   } catch (err) {
+  //     console.error(err)
+  //   }
+  // }
+
+  // const handleSignOut = async () => {
+  //   try {
+  //     await logOut()
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  // }
   const handleSignIn = async () => {
-    try {
-      await googleSignIn()
-    } catch (err) {
-      console.error(err)
-    }
-  }
+    const isOk = await signInWithGoogle();
+
+    if (isOk) router.refresh();
+  };
 
   const handleSignOut = async () => {
-    try {
-      await logOut()
-    } catch (error) {
-      console.error(error)
-    }
-  }
+    const isOk = await signOut();
+
+    if (isOk) router.refresh();
+  };
+  
   return (
     <nav className="flex items-center justify-between bg-black text-white p-4">
       <div className="text-white text-xl font-semibold"><Link href={'/'}>

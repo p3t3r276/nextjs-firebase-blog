@@ -25,7 +25,7 @@ const EditPost: FC<pageProps> = ({ params }) => {
   const getData = useCallback(async (postId: string) => {
     if (params.id === 'new') {  
       setMode('new')
-      const newDate  = Timestamp.fromDate(new Date())
+      const newDate  = new Date()
       const currentBlogUser: BlogUser = {
         id: user?.id,
         name: user?.name,
@@ -64,10 +64,13 @@ const EditPost: FC<pageProps> = ({ params }) => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
     try {
       if (post) {
         if (mode == 'new') {
           await createPost(post, tags)
+          console.log(post)
+          return
           router.push('/')
         } else {
           await updatePost(post, tags, user)
