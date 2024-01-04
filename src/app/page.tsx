@@ -10,8 +10,6 @@ export default async function Home() {
   let posts: Post[] = []
   if (currentUser) {
     posts = await getAllPosts()
-    console
-    posts = JSON.parse(JSON.stringify(posts))
   }
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

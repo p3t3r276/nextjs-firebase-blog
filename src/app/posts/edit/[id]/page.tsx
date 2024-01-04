@@ -1,7 +1,6 @@
 'use client'
 import { FC, FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Timestamp } from "firebase/firestore";
 
 import { UserAuth } from "@/context/AuthContext";
 import { EmptyPost, Post, Tag } from "@/utils/post.model";
