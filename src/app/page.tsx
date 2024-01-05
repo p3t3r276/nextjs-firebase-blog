@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/db/firebaseAdmin';
 import { getAllPosts } from '@/utils/postsService-server';
 import { Post } from '@/utils/post.model';
 import { PostItem } from '@/components/PostItem';
+import { Suspense } from 'react';
+import Loading from './loading';
 
 export default async function Home() {
   const currentUser = await getCurrentUser();
@@ -16,6 +18,7 @@ export default async function Home() {
       <div className="max-w-5xl w-full font-mono text-sm">
         <h1 className="text-center text-4xl">Notes</h1>
         <p className="text-center text-2xl">Taking note the new way.</p>
+        <Suspense fallback={<Loading />}>
         <div className='mt-4'>
           {currentUser ? (
             <>
@@ -32,6 +35,7 @@ export default async function Home() {
             <p>Please login</p>
           ) }
         </div>
+        </Suspense>
       </div>
     </main>
   );
