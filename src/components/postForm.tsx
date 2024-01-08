@@ -1,5 +1,5 @@
 'use client'
-import { ChangeEvent, FC, FormEvent, useState } from "react";
+import { ChangeEvent, FC, FormEvent, useState, useId } from "react";
 import dynamic from "next/dynamic";
 import CreatableSelect from 'react-select/creatable';
 
@@ -7,31 +7,33 @@ import { Post, Tag } from "@/utils/post.model";
 import { Item } from "@/utils/item.model";
 
 interface pageProps {
-  post?: Post,
+  postProp: Post,
   tags: Tag[]
 }
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
 export const Form: FC<pageProps> = ({ 
-  post,
+  postProp,
   tags }) => {
 
+  const [post, setPost] = useState(postProp) 
+
   const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // handleChange(e.target.name, e.target.value)
+    setPost({...post, [e.target.name]: e.target.value })
   }
 
   const handleEditor = (value: any) => { 
-    // handleChange('content', value)
-
+    setPost({...post, content: value })
   }
   const handleSlection = (value: any) => {
     let valueToSubmit: Tag[] = (value as Item[]).map(item => Object.assign({ id: item.value, name: item.label }, {}))
-    // handleChange('tags', valueToSubmit)
+    setPost({...post, tags: valueToSubmit })
   }
 
-  const handleSubmit = () => {
-
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    console.log(post)
   }
 
   const selectItems: Item[] = tags.map(t => Object.assign({ value: t.id, label: t.name }, {}))
@@ -66,7 +68,8 @@ export const Form: FC<pageProps> = ({
                   isMulti={true}
                   name="tags"
                   onChange={(val) => handleSlection(val)} 
-                  defaultValue={defaultValue} /> 
+                  defaultValue={defaultValue}
+                  instanceId={useId()} /> 
               </div>
               <div className="mt-4">
                 <button 
@@ -74,8 +77,12 @@ export const Form: FC<pageProps> = ({
                   type="submit">Post</button>
                 </div>
               <div className="mt-4">
-                <p>Created By: {post.createdBy?.name} at {post.createdAt.toDateString()}</p>
-                <p>Updated By: {post.updatedBy?.name} at {post.updatedAt.toDateString()}</p>
+                {post.createdBy 
+                  ? (<p>Created By: {post.createdBy.name} at {post.createdAt.toDateString()}</p>)
+                  : ''}
+                {post.updatedBy 
+                  ? (<p>Updated By: {post.updatedBy.name} at {post.updatedAt.toDateString()}</p>)
+                  : ''}
               </div>
             </div>
           </div>

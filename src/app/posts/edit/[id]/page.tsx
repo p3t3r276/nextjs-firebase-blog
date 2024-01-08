@@ -6,6 +6,7 @@ import { getAllTags } from "@/utils/tagsService-server";
 import { getCurrentUser } from "@/db/firebaseAdmin";
 import { redirect } from "next/navigation";
 import Loading from "./loading";
+import { EmptyPost } from "@/utils/post.model";
 
 interface pageProps {
   params: { id: string }
@@ -15,7 +16,14 @@ const EditPost: FC<pageProps> = async ({ params }) => {
   const currentUser = await getCurrentUser();
   if (!currentUser)
     redirect('/')
-  const post = await getPostById(params.id)
+
+  let post;
+  if (params.id === 'new') {
+    post = EmptyPost(currentUser, new Date())
+  } else {
+    post = await getPostById(params.id);
+  }
+   
   if (!post) 
     return (<p>No Post... Please go back</p>)
   
@@ -26,7 +34,7 @@ const EditPost: FC<pageProps> = async ({ params }) => {
       <div className="max-w-8xl w-full font-mono text-sm">
         <h2 className='text-center text-4xl'>{params.id === 'new' ? 'New Post' : 'Edit Post'}</h2>
         <Suspense fallback={<Loading />}>
-          <Form post={post} tags={tags} />
+          <Form postProp={post} tags={tags} />
         </Suspense>
       </div>
     </main>
