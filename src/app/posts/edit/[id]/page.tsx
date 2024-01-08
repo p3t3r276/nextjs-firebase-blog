@@ -34,7 +34,7 @@ const EditPost: FC<pageProps> = async ({ params }) => {
       <div className="max-w-8xl w-full font-mono text-sm">
         <h2 className='text-center text-4xl'>{params.id === 'new' ? 'New Post' : 'Edit Post'}</h2>
         <Suspense fallback={<Loading />}>
-          <Form postProp={post} tags={tags} />
+          <Form postProp={post} tags={tags} currentUser={currentUser} />
         </Suspense>
       </div>
     </main>

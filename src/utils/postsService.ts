@@ -12,7 +12,7 @@ export const createPost = async (post: Post, allTags: Tag[]) => {
 
     /* update tags */
     // add new tags
-    let addedTags = post.tags.filter(tag => allTags.includes(tag))
+    let addedTags = post.tags.filter(tag => allTags.some(item => item.id === tag.id))
     // create new tags and add
     let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
   
@@ -36,16 +36,16 @@ export const createPost = async (post: Post, allTags: Tag[]) => {
   }
 }
 
-export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUser | null) => {
+export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUser) => {
   const postTagsDataFromServer = await getTagsByPostId(post.id);
   
   /* update tags */
   // add new tags
-  let addedTags = post.tags.filter(tag => allTags.includes(tag) && !postTagsDataFromServer.includes(tag))
+  let addedTags = post.tags.filter(tag => allTags.some(item => tag.id === item.id) && !postTagsDataFromServer.some(item => item.id === tag.id))
   // create new tags and add
   let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
   // delete tags
-  let deletedTags = postTagsDataFromServer.filter(tag => !post.tags.includes(tag))
+  let deletedTags = postTagsDataFromServer.filter(tag => !post.tags.some(item => item.id === tag.id))
   
   if (newlyCreatedTags.length > 0) {
     // create new tags and add to post
@@ -56,11 +56,11 @@ export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUs
   await updateDoc(doc(db, postCollection, post.id), {
     title: post.title,
     content: post.content,
-    updatedAt: Timestamp.fromDate(new Date()),
+    updatedAt: new Date(),
     updatedBy: {
-      id: currentUser?.id,
-      name: currentUser?.name,
-      email: currentUser?.email
+      name: currentUser.name,
+      email: currentUser.email,
+      photoURL: currentUser?.photoURL
     }
   })
 
