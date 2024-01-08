@@ -1,35 +1,56 @@
 'use client'
-import { ChangeEvent, FC, FormEvent, useState } from "react";
+import { ChangeEvent, FC, FormEvent, useState, useId } from "react";
 import dynamic from "next/dynamic";
 import CreatableSelect from 'react-select/creatable';
+import { useRouter } from "next/navigation";
 
-import { dateTransform } from "@/utils/dateTransform";
 import { Post, Tag } from "@/utils/post.model";
 import { Item } from "@/utils/item.model";
+import { createPost, updatePost } from "@/utils/postsService";
+import { BlogUser } from "@/utils/user.model";
 
 interface pageProps {
-  post?: Post,
+  postProp: Post,
   tags: Tag[],
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => void,
-  handleChange: (name: string, value: any) => void
+  currentUser: BlogUser
 }
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
 export const Form: FC<pageProps> = ({ 
-  post, 
-  handleChange, 
-  handleSubmit,
-  tags }) => {
+  postProp,
+  tags,
+  currentUser }) => {
+  const router = useRouter();
+  const [post, setPost] = useState(postProp) 
 
   const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    handleChange(e.target.name, e.target.value)
+    setPost({...post, [e.target.name]: e.target.value })
   }
 
-  const handleEditor = (value: any) => handleChange('content', value)
+  const handleEditor = (value: any) => { 
+    setPost({...post, content: value })
+  }
   const handleSlection = (value: any) => {
     let valueToSubmit: Tag[] = (value as Item[]).map(item => Object.assign({ id: item.value, name: item.label }, {}))
-    handleChange('tags', valueToSubmit)
+    setPost({...post, tags: valueToSubmit })
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    try {
+      if (post) {
+        if (post.id == '') {
+          const postId = await createPost(post, tags)
+          router.push(`/posts/${postId}`)
+        } else {
+          const postId = await updatePost(post, tags, currentUser)
+          router.push(`/posts/${postId}`)      
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const selectItems: Item[] = tags.map(t => Object.assign({ value: t.id, label: t.name }, {}))
@@ -64,7 +85,8 @@ export const Form: FC<pageProps> = ({
                   isMulti={true}
                   name="tags"
                   onChange={(val) => handleSlection(val)} 
-                  defaultValue={defaultValue} /> 
+                  defaultValue={defaultValue}
+                  instanceId={useId()} /> 
               </div>
               <div className="mt-4">
                 <button 
@@ -72,8 +94,12 @@ export const Form: FC<pageProps> = ({
                   type="submit">Post</button>
                 </div>
               <div className="mt-4">
-                <p>Created By: {post.createdBy?.name} at {dateTransform(post.createdAt)}</p>
-                <p>Updated By: {post.updatedBy?.name} at {dateTransform(post.updatedAt)}</p>
+                {post.createdBy 
+                  ? (<p>Created By: {post.createdBy.name} at {post.createdAt.toDateString()}</p>)
+                  : ''}
+                {post.updatedBy 
+                  ? (<p>Updated By: {post.updatedBy.name} at {post.updatedAt.toDateString()}</p>)
+                  : ''}
               </div>
             </div>
           </div>

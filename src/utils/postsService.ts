@@ -5,45 +5,6 @@ import { Post, Tag } from "./post.model";
 import { createTags, getTagsByPostId } from "./tagsService";
 import { BlogUser } from "./user.model";
 
-export const getAllPosts = async () => {
-  let postArr: Post[] = [];
-  const q = query(collection(db, postCollection), orderBy('updatedAt', 'desc'))
-  const querySnapshot= await getDocs(q)
-
-  querySnapshot.forEach((doc) => {
-    postArr.push({ ...doc.data() as any, id: doc.id})
-  })
-  return postArr
-}
-
-export const getPostById = async (id: string) => {
-  try {
-    let postData: Post | null = null
-    const snapshot = await getDoc(doc(db, postCollection, id))
-    if (snapshot.exists()) {
-      postData = snapshot.data() as any;
-      if (postData) {
-        postData.id = snapshot.id
-      
-        // get tags data
-        // Query the tags subcollection
-        const allTagsQuery = query(collection(db, `${postCollection}/${snapshot.id}/${tagCollection}`))
-        
-        const querySnapshot = await getDocs(allTagsQuery)
-        let tags: Tag[] = [];
-        querySnapshot.forEach(doc => {
-          tags.push({ ...doc.data() as any, id: doc.id})
-        })
-        postData.tags = tags
-      }
-    }
-    return postData
-  } catch(err) {
-    console.error(err)
-  }
-}
-
-
 export const createPost = async (post: Post, allTags: Tag[]) => {
   try {
     const { id, tags, ...rest } = post
@@ -51,7 +12,7 @@ export const createPost = async (post: Post, allTags: Tag[]) => {
 
     /* update tags */
     // add new tags
-    let addedTags = post.tags.filter(tag => allTags.includes(tag))
+    let addedTags = post.tags.filter(tag => allTags.some(item => item.id === tag.id))
     // create new tags and add
     let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
   
@@ -69,21 +30,22 @@ export const createPost = async (post: Post, allTags: Tag[]) => {
     })
 
     await batch.commit();
+    return snapShot.id
   } catch(err) {
     console.error(err)
   }
 }
 
-export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUser | null) => {
+export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUser) => {
   const postTagsDataFromServer = await getTagsByPostId(post.id);
   
   /* update tags */
   // add new tags
-  let addedTags = post.tags.filter(tag => allTags.includes(tag) && !postTagsDataFromServer.includes(tag))
+  let addedTags = post.tags.filter(tag => allTags.some(item => tag.id === item.id) && !postTagsDataFromServer.some(item => item.id === tag.id))
   // create new tags and add
   let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
   // delete tags
-  let deletedTags = postTagsDataFromServer.filter(tag => !post.tags.includes(tag))
+  let deletedTags = postTagsDataFromServer.filter(tag => !post.tags.some(item => item.id === tag.id))
   
   if (newlyCreatedTags.length > 0) {
     // create new tags and add to post
@@ -94,11 +56,11 @@ export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUs
   await updateDoc(doc(db, postCollection, post.id), {
     title: post.title,
     content: post.content,
-    updatedAt: Timestamp.fromDate(new Date()),
+    updatedAt: new Date(),
     updatedBy: {
-      id: currentUser?.id,
-      name: currentUser?.name,
-      email: currentUser?.email
+      name: currentUser.name,
+      email: currentUser.email,
+      photoURL: currentUser?.photoURL
     }
   })
 
@@ -115,6 +77,7 @@ export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUs
   })
 
   await updateTagsSubCol.commit();
+  return post.id
 }
 
 export const removePostById = async (postId: string) => {
