@@ -2,21 +2,26 @@
 import { ChangeEvent, FC, FormEvent, useState, useId } from "react";
 import dynamic from "next/dynamic";
 import CreatableSelect from 'react-select/creatable';
+import { useRouter } from "next/navigation";
 
 import { Post, Tag } from "@/utils/post.model";
 import { Item } from "@/utils/item.model";
+import { createPost, updatePost } from "@/utils/postsService";
+import { BlogUser } from "@/utils/user.model";
 
 interface pageProps {
   postProp: Post,
-  tags: Tag[]
+  tags: Tag[],
+  currentUser: BlogUser
 }
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
 export const Form: FC<pageProps> = ({ 
   postProp,
-  tags }) => {
-
+  tags,
+  currentUser }) => {
+  const router = useRouter();
   const [post, setPost] = useState(postProp) 
 
   const handleInput = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -31,9 +36,21 @@ export const Form: FC<pageProps> = ({
     setPost({...post, tags: valueToSubmit })
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    console.log(post)
+    try {
+      if (post) {
+        if (post.id == '') {
+          const postId = await createPost(post, tags)
+          router.push(`/posts/${postId}`)
+        } else {
+          const postId = await updatePost(post, tags, currentUser)
+          router.push(`/posts/${postId}`)      
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const selectItems: Item[] = tags.map(t => Object.assign({ value: t.id, label: t.name }, {}))

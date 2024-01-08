@@ -5,45 +5,6 @@ import { Post, Tag } from "./post.model";
 import { createTags, getTagsByPostId } from "./tagsService";
 import { BlogUser } from "./user.model";
 
-export const getAllPosts = async () => {
-  let postArr: Post[] = [];
-  const q = query(collection(db, postCollection), orderBy('updatedAt', 'desc'))
-  const querySnapshot= await getDocs(q)
-
-  querySnapshot.forEach((doc) => {
-    postArr.push({ ...doc.data() as any, id: doc.id})
-  })
-  return postArr
-}
-
-export const getPostById = async (id: string) => {
-  try {
-    let postData: Post | null = null
-    const snapshot = await getDoc(doc(db, postCollection, id))
-    if (snapshot.exists()) {
-      postData = snapshot.data() as any;
-      if (postData) {
-        postData.id = snapshot.id
-      
-        // get tags data
-        // Query the tags subcollection
-        const allTagsQuery = query(collection(db, `${postCollection}/${snapshot.id}/${tagCollection}`))
-        
-        const querySnapshot = await getDocs(allTagsQuery)
-        let tags: Tag[] = [];
-        querySnapshot.forEach(doc => {
-          tags.push({ ...doc.data() as any, id: doc.id})
-        })
-        postData.tags = tags
-      }
-    }
-    return postData
-  } catch(err) {
-    console.error(err)
-  }
-}
-
-
 export const createPost = async (post: Post, allTags: Tag[]) => {
   try {
     const { id, tags, ...rest } = post
@@ -69,6 +30,7 @@ export const createPost = async (post: Post, allTags: Tag[]) => {
     })
 
     await batch.commit();
+    return snapShot.id
   } catch(err) {
     console.error(err)
   }
@@ -115,6 +77,7 @@ export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUs
   })
 
   await updateTagsSubCol.commit();
+  return post.id
 }
 
 export const removePostById = async (postId: string) => {
