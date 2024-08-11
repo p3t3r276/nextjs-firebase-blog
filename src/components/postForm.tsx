@@ -39,14 +39,12 @@ export const Form: FC<pageProps> = ({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     try {
-      if (post) {
-        if (post.id == '') {
-          const postId = await createPost(post, tags)
-          router.push(`/posts/${postId}`)
-        } else {
-          const postId = await updatePost(post, tags, currentUser)
-          router.push(`/posts/${postId}`)      
-        }
+      if (post && post.id == '') {
+        const postId = await createPost(post, tags)
+        router.push(`/posts/${postId}`)
+      } else {
+        const postId = await updatePost(post, tags, currentUser)
+        router.push(`/posts/${postId}`)      
       }
     } catch (err) {
       console.error(err)

@@ -1,4 +1,4 @@
-import { Firestore, Query, Timestamp, addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, updateDoc, writeBatch } from "firebase/firestore";
+import { Firestore, Query, addDoc, collection, deleteDoc, doc, getDocs, limit, query, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { postCollection, tagCollection } from "./constants";
 import { Post, Tag } from "./post.model";
@@ -7,15 +7,15 @@ import { BlogUser } from "./user.model";
 
 export const createPost = async (post: Post, allTags: Tag[]) => {
   try {
-    const { id, tags, ...rest } = post
+    const { tags, ...rest } = post
+
+    // add new post
     const snapShot = await addDoc(collection(db, postCollection), rest)
 
-    /* update tags */
-    // add new tags
     let addedTags = post.tags.filter(tag => allTags.some(item => item.id === tag.id))
-    // create new tags and add
     let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
   
+    // create new batch
     if (newlyCreatedTags.length > 0) {
       // create new tags and add to post
       const newTags = await createTags(newlyCreatedTags)
@@ -39,8 +39,6 @@ export const createPost = async (post: Post, allTags: Tag[]) => {
 export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUser) => {
   const postTagsDataFromServer = await getTagsByPostId(post.id);
   
-  /* update tags */
-  // add new tags
   let addedTags = post.tags.filter(tag => allTags.some(item => tag.id === item.id) && !postTagsDataFromServer.some(item => item.id === tag.id))
   // create new tags and add
   let newlyCreatedTags = post.tags.filter(tag => tag.id === tag.name);
@@ -81,21 +79,6 @@ export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUs
 }
 
 export const removePostById = async (postId: string) => {
-  // delete subcollection from web client is not recommended
-  // setup API endpoint
-  // await fetch('/api/posts', {
-  //   method: 'DELETE',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({ postId }),
-  // })
-  // .then(response => {
-  //   console.log(response)
-  // })
-  // .catch(error => {
-  //   console.log(error)
-  // });
   const postDocRef = doc(db, postCollection, postId)
   const tagSubColPath: string = `${postCollection}/${postId}/${tagCollection}`;
 
