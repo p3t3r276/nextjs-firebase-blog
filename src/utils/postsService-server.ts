@@ -24,16 +24,14 @@ export const getPostById = async (id: string) => {
       post = Object.assign(<Post>{ id: postDoc.id }, postDoc.data())
       post.updatedAt = postDoc.data()?.updatedAt.toDate()
       post.createdAt = postDoc.data()?.createdAt.toDate()
-      if (post.id) {
-        // get tags data
-        // Query the tags subcollection
-        const allTags = await dbAdmin.collection(`${postCollection}/${post.id}/${tagCollection}`).get()
-        let tags: Tag[] = [];
-        allTags.forEach(doc => {
-          tags.push({ ...doc.data() as any, id: doc.id})
-        })
-        post.tags = tags
-      }
+      // get tags data
+      // Query the tags subcollection
+      const allTags = await dbAdmin.collection(`${postCollection}/${post.id}/${tagCollection}`).get()
+      let tags: Tag[] = [];
+      allTags.forEach(doc => {
+        tags.push({ ...doc.data() as any, id: doc.id})
+      })
+      post.tags = tags
     }
     return post
   } catch(err) {

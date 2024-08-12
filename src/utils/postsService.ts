@@ -7,7 +7,7 @@ import { BlogUser } from "./user.model";
 
 export const createPost = async (post: Post, allTags: Tag[]) => {
   try {
-    const { tags, ...rest } = post
+    const { id, tags, ...rest } = post
 
     // add new post
     const snapShot = await addDoc(collection(db, postCollection), rest)

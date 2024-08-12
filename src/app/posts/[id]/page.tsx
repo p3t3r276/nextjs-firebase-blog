@@ -21,7 +21,7 @@ export default async function Post ({ params }: pageProps) {
             <>
               <h2 className="text-4xl text-center mb-8">{post.title}</h2>
               <ul className="flex">
-                {post.tags.map(tag => 
+                {post.tags?.map(tag => 
                   <li key={tag.id} className="rounded-lg bg-slate-900 px-4 py-2 text-white m-1">{tag.name}</li>)
                 }
               </ul>
