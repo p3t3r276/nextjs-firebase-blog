@@ -1,4 +1,3 @@
-import { Post } from '../../../utils/post.model'
 import { getPostById } from "@/utils/postsService-server";
 import { dateTransform } from "@/utils/dateUtils";
 import { Suspense } from 'react';
@@ -8,7 +7,7 @@ interface pageProps {
   params: { id: string }
 }
 
-export default async function Post ({ params }: pageProps) {
+export default async function Page ({ params }: pageProps) {
   const post = await getPostById(params.id)
   if (!post) {
     return <p>Cannot find post</p>;

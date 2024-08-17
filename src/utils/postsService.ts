@@ -4,11 +4,13 @@ import { postCollection, tagCollection } from "./constants";
 import { Post, Tag } from "./post.model";
 import { createTags, getTagsByPostId } from "./tagsService";
 import { BlogUser } from "./user.model";
+import { getUTCNow } from "./dateUtils";
 
 export const createPost = async (post: Post, allTags: Tag[]) => {
   try {
     const { id, tags, ...rest } = post
-
+    post.createdAt = getUTCNow();
+    post.updatedAt = getUTCNow();
     // add new post
     const snapShot = await addDoc(collection(db, postCollection), rest)
 
@@ -54,7 +56,7 @@ export const updatePost = async (post: Post, allTags: Tag[], currentUser: BlogUs
   await updateDoc(doc(db, postCollection, post.id), {
     title: post.title,
     content: post.content,
-    updatedAt: new Date(),
+    updatedAt: getUTCNow(),
     updatedBy: {
       name: currentUser.name,
       email: currentUser.email,

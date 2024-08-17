@@ -1,4 +1,3 @@
-import { Timestamp } from "firebase-admin/firestore";
 import { BlogUser } from "./user.model";
 
 export interface Post {
@@ -17,6 +16,6 @@ export interface Tag {
   name: string
 }
 
-export const EmptyPost = (currentUser: BlogUser, createdAt: Date): Post  => {
-  return <Post>{ id: "", title: '', content: '', createdAt: createdAt, updatedAt: createdAt, createdBy: currentUser, updatedBy: currentUser, tags: <Tag[]>[] }
+export const EmptyPost = (currentUser: BlogUser): Post  => {
+  return <Post>{ id: "", title: '', content: '', createdBy: currentUser, updatedBy: currentUser, tags: <Tag[]>[] }
 }
