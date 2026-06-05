@@ -1,10 +1,12 @@
 import Link from 'next/link'
+import { Suspense } from 'react';
 
 import { getCurrentUser } from '@/db/firebaseAdmin';
 import { getAllPosts } from '@/utils/postsService-server';
+
 import { Post } from '@/utils/post.model';
 import { PostItem } from '@/components/PostItem';
-import { Suspense } from 'react';
+
 import Loading from './loading';
 
 export default async function Home() {
@@ -22,7 +24,7 @@ export default async function Home() {
         <div className='mt-4'>
           {currentUser ? (
             <>
-              <Link href={'/posts/edit/new'} className='text-white border-2 border-slate-900 bg-slate-950 hover:bg-slate-800 p-3 text-xl rounded-lg' >
+              <Link href={'/posts/edit/new'} className='text-white border-2 border-slate-900 bg-slate-950 hover:bg-slate-800 p-2 text-xl rounded-lg' >
                 New Post
               </Link>
               <div className='mt-4'></div>

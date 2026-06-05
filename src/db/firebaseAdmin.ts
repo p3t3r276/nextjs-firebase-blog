@@ -31,7 +31,7 @@ export async function isUserAuthenticated(session?: string) {
   }
 }
 
-export async function getCurrentUser() {
+export async function getCurrentUser() : Promise<BlogUser | null> {
   const session = await getSession();
   if (!(await isUserAuthenticated(session))) {
     return null;
@@ -40,7 +40,7 @@ export async function getCurrentUser() {
   const decodedIdToken = await auth.verifySessionCookie(session!);
   const currentUser = await auth.getUser(decodedIdToken.uid);
 
-  return  <BlogUser> {
+  return {
     name: currentUser?.displayName,
     email: currentUser?.email,
     photoURL: currentUser?.photoURL
